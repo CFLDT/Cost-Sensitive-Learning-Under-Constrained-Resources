@@ -23,8 +23,11 @@ class MethodLearner:
 
         if metric == 'basic':
             init_theta = np.zeros(np.shape(X_train)[1] + 1)
+            #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1] + 1)
         else:
             init_theta = np.zeros(np.shape(X_train)[1])
+            #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1])
+
 
         logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx)
         logist.fitting(X_train, y_train, init_theta, metric=metric, n = n, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep, n_c_ep = n_c_ep)

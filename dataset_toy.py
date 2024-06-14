@@ -85,9 +85,9 @@ opt_par_dict = {'General': {'n':1,
                             'p_ep': 0.1,
                             'n_c_ep': 100},
                 'Logit': {'lambd': 1,
-                          'sigma': 100,
-                          'indic_approx': 'logit', #'lambdaloss', 'logit'
-                          'metric': 'roc_auc'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
+                          'sigma': 1,
+                          'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
+                          'metric': 'ep'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": 5,
                          "n_estimators": 100,

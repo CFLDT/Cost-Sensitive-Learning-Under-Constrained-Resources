@@ -53,24 +53,24 @@ class Lgt:
     def optimization_rank(self, obj_func, initial_theta):
         # atm we do not use hessian information
         opt_res = scipy.optimize.minimize(obj_func, initial_theta, method="L-BFGS-B",
-                                          jac=True, options={'disp': False, 'maxiter': 100000})
+                                          jac=True, options={'disp': False, 'maxiter': 100000, 'ftol':1e-8 })
         theta_opt, func_min = opt_res.x, opt_res.fun
         return theta_opt, func_min
 
     def variables_init(self, y_true, y_pred):
 
-        diff_ij = np.zeros(shape=(len(y_true), len(y_true)))
-        G_ij = np.zeros(shape=np.shape(diff_ij))
-        H_ij = np.zeros(shape=np.shape(diff_ij))
-        P_ij = np.zeros(shape=np.shape(diff_ij))
-        P_ji = np.zeros(shape=np.shape(diff_ij))
+        diff_ij = np.zeros(shape=(len(y_true), len(y_true)), dtype=np.float32)
+        G_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        H_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        P_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        P_ji = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
 
-        constant_ij = np.zeros(shape=np.shape(diff_ij))
-        delta_ij = np.zeros(shape=np.shape(diff_ij))
-        lamb_ij = np.zeros(shape=np.shape(diff_ij))
-        lamb_ij_2 = np.zeros(shape=np.shape(diff_ij))
-        # lambd_der_ij = np.zeros(shape=np.shape(diff_ij))
-        # lambd_der_ij_2 = np.zeros(shape=np.shape(diff_ij))
+        constant_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        delta_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        lamb_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        lamb_ij_2 = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        #lambd_der_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
+        #lambd_der_ij_2 = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
         sigma = self.sigma
 
         if np.all(y_pred == 0):
@@ -78,6 +78,8 @@ class Lgt:
             np.random.shuffle(ranks)
         else:
             ranks = rankdata(-y_pred, method='ordinal')  # ordinal. If average dcg issues due to log(0)
+
+        # ranks = rankdata(-y_pred, method='ordinal')         # COMPARE : use this line of code
 
         ranks_v_stack = np.vstack([ranks] * np.shape(ranks)[0])
         ranks_v_stack_trans = ranks_v_stack.T
@@ -185,10 +187,10 @@ class Lgt:
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
         G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (self.roc_auc_max)
 
-        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        diff_output_1 = np.zeros(shape=np.shape(G_ij))
-        diff_output_2 = np.zeros(shape=np.shape(G_ij))
+        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        diff_output_1 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
+        diff_output_2 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
 
         input_1[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])
         input_2[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) + 1
@@ -246,10 +248,10 @@ class Lgt:
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
         G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (self.ap_max)
 
-        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        diff_output_1 = np.zeros(shape=np.shape(G_ij))
-        diff_output_2 = np.zeros(shape=np.shape(G_ij))
+        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        diff_output_1 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
+        diff_output_2 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
 
         input_1[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])
         input_2[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) + 1
@@ -357,20 +359,18 @@ class Lgt:
 
         G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (self.ep_max)
 
-
-        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int8)
-        beta_bin_output_1 = np.zeros(shape=np.shape(G_ij))
-        beta_bin_output_2 = np.zeros(shape=np.shape(G_ij))
+        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        diff_output_1 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
+        diff_output_2 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
 
         input_1[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])
         input_2[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) + 1
 
+        diff_output_1[(bool_true)] = self.discounter[input_1[(bool_true)]-1]
+        diff_output_2[(bool_true)] = self.discounter[input_2[(bool_true)]-1]
 
-        beta_bin_output_1[(bool_true)] = self.discounter[input_1[(bool_true)]-1]
-        beta_bin_output_2[(bool_true)] = self.discounter[input_2[(bool_true)]-1]
-
-        delta_ij[bool_true] = np.abs(beta_bin_output_1[bool_true] - beta_bin_output_2[bool_true])
+        delta_ij[bool_true] = np.abs(diff_output_1[bool_true] - diff_output_2[bool_true])
 
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
@@ -457,11 +457,11 @@ class Lgt:
 
         G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (self.precision_max)
 
-        input_1 = np.zeros(shape=np.shape(G_ij))
-        input_2 = np.zeros(shape=np.shape(G_ij))
+        input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
+        input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
 
-        diff_output_1 = np.zeros(shape=np.shape(G_ij))
-        diff_output_2 = np.zeros(shape=np.shape(G_ij))
+        diff_output_1 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
+        diff_output_2 = np.zeros(shape=np.shape(G_ij), dtype=np.float32)
 
         input_1[bool_true] = np.abs(ranks_v_stack_trans[bool_true] - ranks_v_stack[bool_true])
         diff_output_1[bool_true] = np.where(input_1[bool_true] <= self.n_prec, 1 / self.n_prec, 0)
@@ -485,6 +485,9 @@ class Lgt:
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
         # obj = -PerformanceMetricsTrain.performance_metrics_precision(y_pred, y_true)
 
-        #print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
+
+
+
