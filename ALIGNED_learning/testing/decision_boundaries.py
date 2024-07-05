@@ -4,7 +4,7 @@ from ..plots_tables import dec_boundary_plotter
 from ..design import MethodLearner
 
 
-def decision_boundary(methods, par_dict, X_train, y_train, task_dict):
+def decision_boundary(methods, par_dict, X_train, y_train, y_train_clas, task_dict):
 
     name = task_dict['name']
 
@@ -20,15 +20,15 @@ def decision_boundary(methods, par_dict, X_train, y_train, task_dict):
 
         if method == 'Logit':
 
-            model = MethodLearner.logit(par_dict.get('Logit'),par_dict.get('General'), X_train, y_train)
-            grid_probs = model.predict(grid)
+            model = MethodLearner.logit(par_dict.get('Logit'), X_train, y_train, y_train)
+            grid_probs = model.predict_proba(grid)
             name_2 = par_dict.get('Logit').get('metric')
             method = method + '_' + name_2
 
         elif method == 'Lgbm':
 
-            lgboost, model = MethodLearner.lgbmboost(par_dict.get('Lgbm'), par_dict.get('General'), X_train, y_train)
-            grid_probs = lgboost.predict(model, grid)
+            lgboost, model = MethodLearner.lgbmboost(par_dict.get('Lgbm'), X_train, y_train, y_train_clas)
+            grid_probs = lgboost.predict_proba(model, grid)
             name_2 = par_dict.get('Lgbm').get('metric')
             method = method + '_' + name_2
             #grid_probs = normalizer(grid_probs)

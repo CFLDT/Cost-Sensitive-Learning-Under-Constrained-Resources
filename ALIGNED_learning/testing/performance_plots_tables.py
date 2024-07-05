@@ -11,13 +11,23 @@ from ALIGNED_learning.design import DivClean
 
 from sklearn.preprocessing import StandardScaler
 from pathlib import Path
+import math
 
 base_path = Path(__file__).parent
 
 
 def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_list,
                       train_list, validate_list, test_list, feature_importance, cross_val_perf_ind,
-                      n, p_prec, p_rbp, p_ep, n_c_ep, cost_train, cost_validate, keep_first):
+                      cost_train, cost_validate, keep_first):
+
+    n_ratio = par_dict_init.get('General_val_test').get("n_ratio")
+    n_p_prec = par_dict_init.get('General_val_test').get("n_p_prec")
+    p_rbp = par_dict_init.get('General_val_test').get("p_rbp")
+    n_p_ep = par_dict_init.get('General_val_test').get("n_p_ep")
+    #n_c_ep = par_dict_init.get('General_val_test').get("n_c_ep")
+    n_n_found = par_dict_init.get('General_val_test').get("n_n_found")
+
+
     X_train_list = []
     X_validation_list = []
     X_test_list = []
@@ -26,9 +36,9 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
     y_validation_list = []
     y_test_list = []
 
-    y_c_train_list = []
-    y_c_validation_list = []
-    y_c_test_list = []
+    y_cost_train_list = []
+    y_cost_validation_list = []
+    y_cost_test_list = []
 
     m_score_test_list = []
     f_score_test_list = []
@@ -50,9 +60,9 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         y_validations = []
         y_tests = []
 
-        y_c_trains = []
-        y_c_validations = []
-        y_c_tests = []
+        y_cost_trains = []
+        y_cost_validations = []
+        y_cost_tests = []
 
         m_score_tests = []
         f_score_tests = []
@@ -63,11 +73,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         for train_index, validation_index in zip(train_indexs, validation_indexs):
             X_trains.append(X.iloc[train_index])
             y_trains.append(np.array(y.iloc[train_index]))
-            y_c_trains.append(np.array(y_c.iloc[train_index]))
+            y_cost_trains.append(np.array(y_c.iloc[train_index]))
 
             X_validations.append(X.iloc[validation_index])
             y_validations.append(np.array(y.iloc[validation_index]))
-            y_c_validations.append(np.array(y_c.iloc[validation_index]))
+            y_cost_validations.append(np.array(y_c.iloc[validation_index]))
 
             nam_spl = names[0].split('_')
             name = nam_spl[0] + '_' + nam_spl[1] + '_' + nam_spl[2] + '_' + nam_spl[3] + '_' + nam_spl[4]
@@ -77,7 +87,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 methods=methods, par_dict_init_cv=par_dict_init_cv, X=X,
                 y=y, y_c=y_c, train_index=train_index, validation_index=validation_index, name=name,
                 perf_ind=cross_val_perf_ind,
-                n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep, cost_train=cost_train,
+                n_ratio=n_ratio, p_prec=n_p_prec, p_rbp=p_rbp, p_ep=n_p_ep, n_n_found = n_n_found, cost_train=cost_train,
                 cost_validate=cost_validate, skip_cross_validate = skip_cross_validate)
 
             par_dicts.append(par_dict)
@@ -93,8 +103,8 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         y_train_list.append(y_trains)
         y_validation_list.append(y_validations)
 
-        y_c_train_list.append(y_c_trains)
-        y_c_validation_list.append(y_c_validations)
+        y_cost_train_list.append(y_cost_trains)
+        y_cost_validation_list.append(y_cost_validations)
 
         par_dict_list.append(par_dicts)
         datapipeline_list.append(datapipelines)
@@ -102,14 +112,14 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         for test_index in test_indexs:
             X_tests.append(X.iloc[test_index])
             y_tests.append(np.array(y.iloc[test_index]))
-            y_c_tests.append(np.array(y_c.iloc[test_index]))
+            y_cost_tests.append(np.array(y_c.iloc[test_index]))
 
             m_score_tests.append(np.array(m_score.iloc[test_index]))
             f_score_tests.append(np.array(f_score.iloc[test_index]))
 
         X_test_list.append(X_tests)
         y_test_list.append(y_tests)
-        y_c_test_list.append(y_c_tests)
+        y_cost_test_list.append(y_cost_tests)
 
         m_score_test_list.append(m_score_tests)
         f_score_test_list.append(f_score_tests)
@@ -244,7 +254,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
 
             X_train = X_train_list[i][j]
             y_train = y_train_list[i][j]
-            y_c_train = y_c_train_list[i][j]
+            y_cost_train = y_cost_train_list[i][j]
 
             X_train_imp, X_test_imp, _ = scaler(
                 np.array(datapipeline.pipeline_trans(X_train)))
@@ -257,23 +267,21 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
             if 'Logit' in methods:
 
                 if cost_train == False:
-                    model_logit = MethodLearner.logit(par_dict_opt.get('Logit'), par_dict_init.get('General'),
-                                                      X_train_imp, y_train)
+                    model_logit = MethodLearner.logit(par_dict_opt.get('Logit'),
+                                                      X_train_imp, y_train, y_train)
 
                 if cost_train == True:
-                    model_logit = MethodLearner.logit(par_dict_opt.get('Logit'), par_dict_init.get('General'),
-                                                      X_train_imp, y_c_train)
+                    model_logit = MethodLearner.logit(par_dict_opt.get('Logit'),
+                                                      X_train_imp, y_cost_train,y_train)
 
             if 'Lgbm' in methods:
 
                 if cost_train == False:
                     lgbmboost, model_lgbm = MethodLearner.lgbmboost(par_dict_opt.get('Lgbm'),
-                                                                    par_dict_init.get('General'),
-                                                                    X_train_na, y_train)
+                                                                    X_train_na, y_train, y_train)
                 if cost_train == True:
                     lgbmboost, model_lgbm = MethodLearner.lgbmboost(par_dict_opt.get('Lgbm'),
-                                                                    par_dict_init.get('General'),
-                                                                    X_train_na, y_c_train)
+                                                                    X_train_na, y_cost_train, y_train)
 
             if 'ENSImb' in methods:
                 ens, model_ensimb = MethodLearner.ensimb(par_dict_opt.get('ENSImb'), X_train_imp,
@@ -283,7 +291,10 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
 
                 X_test = X_test_list[i][k]
                 y_test = y_test_list[i][k]
-                y_c_test = y_c_test_list[i][k]
+                y_cost_test = y_cost_test_list[i][k]
+
+                if X_test.empty:
+                    continue
 
                 m_score_test = m_score_test_list[i][k]
                 f_score_test = f_score_test_list[i][k]
@@ -301,11 +312,10 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
 
                 if 'Logit' in methods:
 
-                    predict = model_logit.predict(X_test_imp)
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep)
+                    predict = model_logit.predict_proba(X_test_imp)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=n_p_ep, n_n_found = n_n_found)
 
                     roc_auc_df.loc[name_test, 'Logit'] = roc
                     ap_df.loc[name_test, 'Logit'] = ap
@@ -317,11 +327,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                     ep_df.loc[name_test, 'Logit'] = ep
                     n_found_df.loc[name_test, 'Logit'] = n_found
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=True)
 
                     roc_auc_c_df.loc[name_test, 'Logit'] = roc
                     ap_c_df.loc[name_test, 'Logit'] = ap
@@ -338,11 +348,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
 
                 if 'Lgbm' in methods:
 
-                    predict = lgbmboost.predict(model_lgbm, X_test_na)
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    predict = lgbmboost.predict_proba(model_lgbm, X_test_na)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=False)
 
                     roc_auc_df.loc[name_test, 'Lgbm'] = roc
                     ap_df.loc[name_test, 'Lgbm'] = ap
@@ -354,11 +364,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                     ep_df.loc[name_test, 'Lgbm'] = ep
                     n_found_df.loc[name_test, 'Lgbm'] = n_found
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=True)
 
                     roc_auc_c_df.loc[name_test, 'Lgbm'] = roc
                     ap_c_df.loc[name_test, 'Lgbm'] = ap
@@ -375,11 +385,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
 
                 if 'ENSImb' in methods:
 
-                    predict = ens.predict(model_ensimb, X_test_imp)
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    predict = ens.predict_proba(model_ensimb, X_test_imp)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=False)
 
                     roc_auc_df.loc[name_test, 'ENSImb'] = roc
                     ap_df.loc[name_test, 'ENSImb'] = ap
@@ -391,11 +401,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                     ep_df.loc[name_test, 'ENSImb'] = ep
                     n_found_df.loc[name_test, 'ENSImb'] = n_found
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=True)
 
                     roc_auc_c_df.loc[name_test, 'ENSImb'] = roc
                     ap_c_df.loc[name_test, 'ENSImb'] = ap
@@ -413,11 +423,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 if 'M_score' in methods:
                     predict = m_score_test
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=False)
 
                     roc_auc_df.loc[name_test, 'M_score'] = roc
                     ap_df.loc[name_test, 'M_score'] = ap
@@ -429,11 +439,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                     ep_df.loc[name_test, 'M_score'] = ep
                     n_found_df.loc[name_test, 'M_score'] = n_found
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=True)
 
                     roc_auc_c_df.loc[name_test, 'M_score'] = roc
                     ap_c_df.loc[name_test, 'M_score'] = ap
@@ -448,11 +458,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 if 'F_score' in methods:
                     predict = f_score_test
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=False)
                     roc_auc_df.loc[name_test, 'F_score'] = roc
                     ap_df.loc[name_test, 'F_score'] = ap
                     disc_cum_gain_df.loc[name_test, 'F_score'] = dcg
@@ -463,11 +473,11 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                     ep_df.loc[name_test, 'F_score'] = ep
                     n_found_df.loc[name_test, 'F_score'] = n_found
 
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_test, n=n,
-                                                                                          p_prec=p_prec,
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_test, n_ratio=n_ratio,
+                                                                                          n_p_prec=n_p_prec,
                                                                                           p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                                                                                          n_p_ep=n_p_ep,
+                                                                                          n_n_found = n_n_found, cost=True)
 
                     roc_auc_c_df.loc[name_test, 'F_score'] = roc
                     ap_c_df.loc[name_test, 'F_score'] = ap
@@ -487,33 +497,36 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                            ep_c_df, n_found_c_df)
 
 
-def performances(predict_prob, y_test, n, p_prec, p_rbp, p_ep, n_c_ep, cost=False):
-    n_c = n * len(y_test)
-    n_prec_c = p_prec * len(y_test)
-    n_found = n_prec_c
+def performances(predict_prob, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_found, cost=False):
+
+    n = n_ratio * len(y_test)
+
+    n_prec = n_p_prec
+    p_ep = n_p_ep / len(y_test)
+    n_ep = math.ceil(1/(p_ep * (1-p_ep)))
 
     try:
-        roc = PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_test, n=n_c)
-        ap = PerformanceMetrics.performance_metrics_ap(predict_prob, y_test, n=n_c)
-        precision = PerformanceMetrics.performance_metrics_precision(predict_prob, y_test, n_prec_c, n=n_c)
-        dcg = PerformanceMetrics.performance_metrics_dcg(predict_prob, y_test, n=n_c)
-        arp = PerformanceMetrics.performance_metrics_arp(predict_prob, y_test, n=n_c)
-        rbp = PerformanceMetrics.performance_metrics_rbp(predict_prob, y_test, p_rbp, n=n_c)
-        uplift = PerformanceMetrics.performance_metrics_uplift(predict_prob, y_test, n=n_c)
-        ep = PerformanceMetrics.performance_metrics_ep(predict_prob, y_test, p_ep, n_c_ep, n=n_c)
-        n_found = PerformanceMetrics.performance_metrics_n_found(predict_prob, y_test, n_found, n=n_c)
+        roc = PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_test, n=n)
+        ap = PerformanceMetrics.performance_metrics_ap(predict_prob, y_test, n=n)
+        precision = PerformanceMetrics.performance_metrics_precision(predict_prob, y_test, n_prec, n=n)
+        dcg = PerformanceMetrics.performance_metrics_dcg(predict_prob, y_test, n=n)
+        arp = PerformanceMetrics.performance_metrics_arp(predict_prob, y_test, n=n)
+        rbp = PerformanceMetrics.performance_metrics_rbp(predict_prob, y_test, p_rbp, n=n)
+        uplift = PerformanceMetrics.performance_metrics_uplift(predict_prob, y_test, n=n)
+        ep = PerformanceMetrics.performance_metrics_ep(predict_prob, y_test, p_ep, n_ep, n=n)
+        n_found = PerformanceMetrics.performance_metrics_n_found(predict_prob, y_test, n_n_found, n=n)
 
         if cost == False:
-            roc = roc / PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_test, maximum=True, n=n_c)
-            ap = ap / PerformanceMetrics.performance_metrics_ap(predict_prob, y_test, maximum=True, n=n_c)
-            precision = precision / PerformanceMetrics.performance_metrics_precision(predict_prob, y_test, n_prec_c,
-                                                                                     maximum=True, n=n_c)
-            dcg = dcg / PerformanceMetrics.performance_metrics_dcg(predict_prob, y_test, maximum=True, n=n_c)
-            arp = arp / PerformanceMetrics.performance_metrics_arp(predict_prob, y_test, maximum=True, n=n_c)
-            rbp = rbp / PerformanceMetrics.performance_metrics_rbp(predict_prob, y_test, p_rbp, maximum=True, n=n_c)
-            uplift = uplift / PerformanceMetrics.performance_metrics_uplift(predict_prob, y_test, maximum=True, n=n_c)
-            ep = ep / PerformanceMetrics.performance_metrics_ep(predict_prob, y_test, p_ep, n_c_ep, maximum=True, n=n_c)
-            n_found = PerformanceMetrics.performance_metrics_n_found(predict_prob, y_test, n_found, n=n_c)
+            roc = roc / PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_test, maximum=True, n=n)
+            ap = ap / PerformanceMetrics.performance_metrics_ap(predict_prob, y_test, maximum=True, n=n)
+            precision = precision / PerformanceMetrics.performance_metrics_precision(predict_prob, y_test, n_prec,
+                                                                                     maximum=True, n=n)
+            dcg = dcg / PerformanceMetrics.performance_metrics_dcg(predict_prob, y_test, maximum=True, n=n)
+            arp = arp / PerformanceMetrics.performance_metrics_arp(predict_prob, y_test, maximum=True, n=n)
+            rbp = rbp / PerformanceMetrics.performance_metrics_rbp(predict_prob, y_test, p_rbp, maximum=True, n=n)
+            uplift = uplift / PerformanceMetrics.performance_metrics_uplift(predict_prob, y_test, maximum=True, n=n)
+            ep = ep / PerformanceMetrics.performance_metrics_ep(predict_prob, y_test, p_ep, n_ep, maximum=True, n=n)
+            n_found = PerformanceMetrics.performance_metrics_n_found(predict_prob, y_test, n_n_found, n=n)
 
     except:
 
@@ -523,7 +536,7 @@ def performances(predict_prob, y_test, n, p_prec, p_rbp, p_ep, n_c_ep, cost=Fals
 
 
 def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index, validation_index,
-                               name, perf_ind, n, p_prec, p_rbp, p_ep, n_c_ep, cost_train, cost_validate, skip_cross_validate):
+                               name, perf_ind, n_ratio, p_prec, p_rbp, p_ep, n_n_found, cost_train, cost_validate, skip_cross_validate):
 
     datapipeline = DivClean.divide_clean(X, train_index, validation_index)
 
@@ -541,8 +554,8 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
         y_train = np.array(y.iloc[train_index])
         y_val = np.array(y.iloc[validation_index])
 
-        y_c_train = np.array(y_c.iloc[train_index])
-        y_c_val = np.array(y_c.iloc[validation_index])
+        y_cost_train = np.array(y_c.iloc[train_index])
+        y_cost_val = np.array(y_c.iloc[validation_index])
 
         if 'Logit' in methods:
             cart_prod_log = list(product(*par_dict.get('Logit').values()))
@@ -576,24 +589,24 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                     par_dict_log.update({key: value[i]})
 
                 if cost_train == False:
-                    model = MethodLearner.logit(par_dict_log, par_dict.get('General'), X_train_imp, y_train)
-                    predict = model.predict(X_val_imp)
+                    model = MethodLearner.logit(par_dict_log, X_train_imp, y_train, y_train)
+                    predict = model.predict_proba(X_val_imp)
 
                 if cost_train == True:
-                    model = MethodLearner.logit(par_dict_log, par_dict.get('General'), X_train_imp, y_c_train)
-                    predict = model.predict(X_val_imp)
+                    model = MethodLearner.logit(par_dict_log, X_train_imp, y_cost_train, y_train)
+                    predict = model.predict_proba(X_val_imp)
 
                 if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=True)
 
                 if perf_ind == 'ap':
                     per_matrix_log[j] += ap
@@ -626,25 +639,25 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                     par_dict_lgbm.update({key: value[i]})
 
                 if cost_train == False:
-                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, par_dict.get('General'), X_train_na, y_train)
-                    predict = lgbmboost.predict(model, X_val_na)
+                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na, y_train, y_train)
+                    predict = lgbmboost.predict_proba(model, X_val_na)
 
                 if cost_train == True:
-                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, par_dict.get('General'), X_train_na,
-                                                               y_c_train)
-                    predict = lgbmboost.predict(model, X_val_na)
+                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na,
+                                                               y_cost_train, y_train)
+                    predict = lgbmboost.predict_proba(model, X_val_na)
 
                 if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=True)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=True)
 
                 if perf_ind == 'ap':
                     per_matrix_lgbm[j] += ap
@@ -677,19 +690,19 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                     par_dict_ens.update({key: value[i]})
 
                 ensimb, model = MethodLearner.ensimb(par_dict_ens, X_train_imp, y_train)
-                predict = ensimb.predict(model, X_val_imp)
+                predict = ensimb.predict_proba(model, X_val_imp)
 
                 if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_c_val, n=n,
-                                                                                          p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          p_ep=p_ep,
-                                                                                          n_c_ep=n_c_ep, cost=False)
+                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                          n_p_ep=p_ep,
+                                                                                          n_n_found=n_n_found, cost=False)
 
                 if perf_ind == 'ap':
                     per_matrix_ens[j] += ap

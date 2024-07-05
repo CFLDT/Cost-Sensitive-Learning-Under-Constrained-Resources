@@ -105,7 +105,7 @@ class PerformanceMetrics:
         return value
 
     @staticmethod
-    def performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, maximum=False, n=None):
+    def performance_metrics_ep(y_pred, y_true, p_ep, n_ep, maximum=False, n=None):
 
         if n == None:
             n = len(y_true)
@@ -118,11 +118,11 @@ class PerformanceMetrics:
             for i in range(len(true_values), 0, -1):
 
                 if i < len(true_values):
-                    top = beta.cdf((i + 0.5) / len(true_values), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                    top = beta.cdf((i + 0.5) / len(true_values), p_ep * n_ep, n_ep * (1 - p_ep))
                 else:
                     top = 1
 
-                bot = beta.cdf((i - 0.5) / len(true_values), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                bot = beta.cdf((i - 0.5) / len(true_values), p_ep * n_ep, n_ep * (1 - p_ep))
 
                 prob = top - bot
 
@@ -234,9 +234,9 @@ class PerformanceMetrics:
                     discounter[i] = 1
             gains = true_values
 
-            precision = np.sum(np.multiply(discounter, gains))
+            n_found = np.sum(np.multiply(discounter, gains))
 
-            return precision
+            return n_found
 
         if maximum == False:
             if np.all(y_pred == 0):

@@ -24,12 +24,12 @@ def plot_feature_imp_shap(method, name, model, X, y, features):
 
         if method == 'Logit' :
 
-            pred_fun = model.predict
+            pred_fun = model.predict_proba
 
         elif method == 'Lgbm':
 
             def pred(X):
-                return Lightgbm().predict(model, X)
+                return Lightgbm().predict_proba(model, X)
 
             pred_fun = pred
 

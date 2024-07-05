@@ -16,7 +16,7 @@ class Lgt:
         self.n_prec = n_prec
         self.p_rbp = p_rbp
         self.p_ep = p_ep
-        self.n_c_ep = n_c_ep
+        self.n_ep = n_c_ep
 
     def predict(self, X_predict):
         if X_predict.shape[1] == len(self.theta):
@@ -34,6 +34,9 @@ class Lgt:
             scores = self.theta[0] + X_predict.dot(self.theta[1:])
         scores = 1 / (1 + np.exp(-scores))
 
+        return scores
+
+
     def optimization_basic(self, obj_func, initial_theta):
         opt_res = scipy.optimize.minimize(obj_func, initial_theta, method="L-BFGS-B",  # L-BFGS-B uses approx of hessian
                                           options={'disp': False, 'maxiter': 100000})
@@ -46,7 +49,7 @@ class Lgt:
         loss_1_0 = np.log(1 + np.exp(-scores))
         loss_0_0 = np.log(1 + np.exp(scores))
 
-        objective = -div * (weight_1_0.dot(loss_1_0) + weight_0_0.dot(loss_0_0)) + self.lambd * np.sum(theta[1:] ** 2)
+        objective = div * (weight_1_0.dot(loss_1_0) + weight_0_0.dot(loss_0_0)) + self.lambd * np.sum(theta[1:] ** 2)
 
         return objective
 

@@ -17,7 +17,7 @@ base_path = Path(__file__).parent
 
 n_n = 200
 n_fe = 10
-n_fc = 60
+n_fc = 10
 
 x_n_1, x_n_2 = np.random.multivariate_normal([6, 5], [[1, 0], [0, 2]], size=n_n).T
 x_fe_1, x_fe_2 = np.random.multivariate_normal([11.5, 1.5], [[0.3, 0], [0, 0.3]], size=n_fe).T
@@ -34,7 +34,7 @@ y_n = np.zeros(n_n)
 y_fc = np.ones(n_fc)
 y_fe = np.ones(n_fe)
 
-y_n = np.random.choice([0, 1], size=(n_n,), p=[0.5, 0.5])
+y_n = np.random.choice([0, 1], size=(n_n,), p=[0.9, 0.1])
 # y_fc = np.random.choice([0, 1], size=(n_fc,), p=[0.5, 0.5])
 # y_fe = np.random.choice([0, 1], size=(n_fe,), p=[0.5, 0.5])
 
@@ -79,26 +79,36 @@ X_train, X_val, _ = scaler(
 
 task_dict = {'name': 'Toy_Data_1'}
 
-opt_par_dict = {'General': {'n':1,
-                            'p_prec':  0.1,
-                            'p_rbp':  0.8,
-                            'p_ep': 0.1,
-                            'n_c_ep': 100},
-                'Logit': {'lambd': 1,
+opt_par_dict = {'Logit': {'lambd': 0,
                           'sigma': 1,
                           'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
-                          'metric': 'ep'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
+                          'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": 5,
-                         "n_estimators": 100,
+                         "n_estimators": 50,
                          "lambd": 0,
-                         "learning_rate": 0.1,
+                         "alpha": 0,
+                         "learning_rate": 0.01,
                          "subsample": 1,
+                         "subsample_freq": 1,
+                         "sampling_strategy": 1,
                          "min_child_samples": 0,
                          "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'
                          "sigma": 1,                   # 1 for validation 'binary' and 'lambdarank'
-                         "indic_approx": 'logit',   #'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
+                         "indic_approx": 'lambdaloss',   #'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
                          "metric": 'ep'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision
+
+opt_par_dict["Logit"]["n_ratio"] = 1
+opt_par_dict["Logit"]["p_prec"] = 0.1
+opt_par_dict["Logit"]["p_rbp"] = 0.8
+opt_par_dict["Logit"]["p_ep"] = 0.5
+opt_par_dict["Logit"]["n_c_ep"] = 5
+
+opt_par_dict["Lgbm"]["n_ratio"] = 1
+opt_par_dict["Lgbm"]["p_prec"] = 0.1
+opt_par_dict["Lgbm"]["p_rbp"] = 0.8
+opt_par_dict["Lgbm"]["p_ep"] = 0.5
+opt_par_dict["Lgbm"]["n_c_ep"] = 5
 
 
 # TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'
@@ -108,5 +118,5 @@ opt_par_dict = {'General': {'n':1,
 #https://lightgbm.readthedocs.io/en/latest/Parameters.html#lambdarank_truncation_level
 dec_bound = True
 if dec_bound:
-    decision_boundary(['Logit'], opt_par_dict, X_train, y, task_dict=task_dict)
+    decision_boundary(['Lgbm'], opt_par_dict, X_train, y, y, task_dict=task_dict)
 

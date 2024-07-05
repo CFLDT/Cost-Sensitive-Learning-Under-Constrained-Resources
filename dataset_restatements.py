@@ -187,22 +187,27 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
 
 
 # pas self.max zaken aan zoals subsample...
-def get_par_dict(n, p_prec, p_rbp, p_ep, n_c_ep, optimisation_metric):
-    par_dict = {'General': {'n': n,
+def get_par_dict(n_ratio, p_prec, p_rbp, p_ep, n_n_found, optimisation_metric):
+    par_dict = {'General': {'n_ratio': n_ratio,
                             'p_prec': p_prec,
                             'p_rbp': p_rbp,
                             'p_ep': p_ep,
-                            'n_c_ep': n_c_ep},
+                            'n_n_found':n_n_found},
                 'Logit': {'lambd': [0],
+                          'alpha': [0],
                           'sigma': [1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50],
-                         "lambd": [1],
+                         "n_estimators": [5],
+                         "alpha": [0.01],
+                         "lambd": [0],
                          "learning_rate": [0.01],
+                         "colsample_bytree": [0.75],
                          "subsample": [1],
+                         "sampling_strategy": [1],
+                         "sample_freq": [0],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
                          "sigma": [1],  # 1 for validation 'binary' and 'lambdarank'
@@ -258,9 +263,10 @@ if 'experiment_1' in experiments:
     cross_val_perf_ind = 'ep'
     optimisation_metric = 'ep'
 
-    n = 1
+    n_ratio = 1
     p_prec = 0.1
     p_rbp = 0.9
+    n_n_found = 100
 
     p_ep = 0.1
     n_c_ep = 12
@@ -269,8 +275,15 @@ if 'experiment_1' in experiments:
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_1_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep,
+    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_n_found=n_n_found,
                             optimisation_metric=[optimisation_metric])
+
+    par_dict["Logit"]["n_ratio"] = [1]
+    par_dict["Logit"]["p_ep"] = [0.5]
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["p_ep"] = [0.5]
+
     name = 'Restatement_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
@@ -280,7 +293,7 @@ if 'experiment_1' in experiments:
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep, cost_train=cost_train,
+                      cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
 if 'experiment_2' in experiments:
@@ -288,9 +301,10 @@ if 'experiment_2' in experiments:
     cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
-    n = 1
+    n_ratio = 1
     p_prec = 0.1
     p_rbp = 0.9
+    n_n_found = 100
 
     p_ep = 0.1
     n_c_ep = 12
@@ -300,8 +314,12 @@ if 'experiment_2' in experiments:
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_2_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep,
+    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep,n_n_found=n_n_found,
                             optimisation_metric=[optimisation_metric])
+
+    par_dict["Logit"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["n_ratio"] = [1]
+
     name = 'Restatement_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
@@ -311,7 +329,7 @@ if 'experiment_2' in experiments:
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep, cost_train=cost_train,
+                      cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
 if 'experiment_3' in experiments:
@@ -319,9 +337,10 @@ if 'experiment_3' in experiments:
     cross_val_perf_ind = 'precision'
     optimisation_metric = 'precision'
 
-    n = 1
+    n_ratio = 1
     p_prec = 0.1
     p_rbp = 0.9
+    n_n_found = 100
 
     p_ep = 0.1
     n_c_ep = 12
@@ -330,8 +349,15 @@ if 'experiment_3' in experiments:
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_3_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep,
+    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_n_found=n_n_found,
                             optimisation_metric=[optimisation_metric])
+
+    par_dict["Logit"]["n_ratio"] = [1]
+    par_dict["Logit"]["p_ep"] = [0.5]
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["p_ep"] = [0.5]
+
     name = 'Restatement_experiment_3_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
@@ -341,5 +367,5 @@ if 'experiment_3' in experiments:
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      n=n, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_c_ep=n_c_ep, cost_train=cost_train,
+                      cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)

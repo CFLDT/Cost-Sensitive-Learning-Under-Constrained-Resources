@@ -12,14 +12,14 @@ class Logit(Lgt):
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
-    def fitting(self, X, y, init_theta, metric, n = None, p_prec=None, p_rbp=None, p_ep=None, n_c_ep=None):
+    def fitting(self, X, y, y_clas, init_theta, metric, n_ratio = None, p_prec=None, p_rbp=None, p_ep=None, n_ep=None):
 
         random.seed(2290)
         np.random.seed(2290)
 
         starttimer = timer()
 
-        self.n = int(n*len(y))
+        self.n = int(n_ratio * len(y))
 
         div = 1 / X.shape[0]
 
@@ -77,18 +77,18 @@ class Logit(Lgt):
 
         if metric == 'ep':
             self.p_ep = p_ep
-            self.n_c_ep = n_c_ep
+            self.n_ep = n_ep
 
             discounter = np.zeros(len(y))
             disc = 0
             for i in range(len(y), 0, -1):
 
                 if i < len(y):
-                    top = beta.cdf((i + 0.5) / len(y), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                    top = beta.cdf((i + 0.5) / len(y), p_ep * n_ep, n_ep * (1 - p_ep))
                 else:
                     top = 1
 
-                bot = beta.cdf((i - 0.5) / len(y), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                bot = beta.cdf((i - 0.5) / len(y), p_ep * n_ep, n_ep * (1 - p_ep))
 
                 prob = top - bot
 
@@ -96,7 +96,7 @@ class Logit(Lgt):
                 discounter[i - 1] = disc
 
             self.discounter = discounter*len(y)
-            self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_c_ep, maximum=True)
+            self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_ep, maximum=True)
 
             def obj_func(theta):
                 return self.ep(theta, X, y)

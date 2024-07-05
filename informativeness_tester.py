@@ -13,17 +13,17 @@ np.random.seed(2290)
 
 
 iterations = 30
-prior = 0.05
+prior = 0.1
 n_t = 100
 
 
 p_prec = 0.1
-p_ep = 0.1
+p_ep = 0.5
 n_c_ep = math.ceil(1/(p_ep * (1-p_ep)))
 p_rbp = 0.9
 
 original_metric = 'ep'
-target_metric = 'rbp'
+target_metric = 'ap'
 
 label_noise = False
 label_noise_0 = 0

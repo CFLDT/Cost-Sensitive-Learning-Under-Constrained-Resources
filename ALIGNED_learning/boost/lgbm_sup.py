@@ -6,18 +6,23 @@ import random
 import sys, os
 from scipy.stats import betabinom, beta
 from ALIGNED_learning.design.performance_metrics import PerformanceMetrics
+import math
 
 
 class Lgbm(Lightgbm):
 
-    def __init__(self, n_estimators, num_leaves, reg_lambda, learning_rate, subsample, min_child_samples,
-                 min_child_weight, sigma, indic_approx):
+    def __init__(self, n_estimators, num_leaves, reg_lambda, reg_alpha, learning_rate, colsample_bytree, subsample, subsample_freq,
+                 sampling_strategy, min_child_samples, min_child_weight, sigma, indic_approx):
 
         self.n_estimators = n_estimators
         self.num_leaves = num_leaves
         self.reg_lambda = reg_lambda
+        self.reg_alpha = reg_alpha
         self.learning_rate = learning_rate
+        self.colsample_bytree = colsample_bytree
         self.subsample = subsample
+        self.subsample_freq = subsample_freq
+        self.sampling_strategy = sampling_strategy
         self.min_child_samples = min_child_samples
         self.min_child_weight = min_child_weight
         self.sigma = sigma
@@ -25,19 +30,45 @@ class Lgbm(Lightgbm):
 
         super().__init__(sigma,indic_approx)
 
-    def fitting(self, X, y, metric, n = None, p_prec = None, p_rbp = None, p_ep = None, n_c_ep = None):
+    def fitting(self, X, y, y_clas, metric, n_ratio = None, p_prec = None, p_rbp = None, p_ep = None):
+
         random.seed(2290)
         np.random.seed(2290)
 
         starttimer = timer()
 
+        indices_0 = np.where(y_clas == 0)[0]
+        indices_1 = np.where(y_clas == 1)[0]
+        #all_ind = np.arange(len(y_clas))
+        ratio = self.sampling_strategy
+
+        if self.sampling_strategy is not None:
+            self.indices_list = []
+            self.it_index = 0
+            for i in range(self.n_estimators):
+                ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / ratio) * indices_1.shape[0])), replace=False)
+                ind_all = np.append(indices_1, ind_0)
+                #ind_d = [x for x in all_ind if x not in ind_all]
+                self.indices_list.append(list(ind_all))
+
+
         if metric == 'basic':
 
             if np.array_equal(y, y.astype(bool)) == True:
 
+                if self.sampling_strategy is None:
+                    neg_bagging_fraction = 1
+
+                if self.sampling_strategy is not None:
+                    n_majority = np.count_nonzero(y) / self.sampling_strategy
+                    neg_bagging_fraction = n_majority / (len(y) - np.count_nonzero(y))
+                    neg_bagging_fraction = min(neg_bagging_fraction,1)
+
                 model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                        learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                       subsample=self.subsample,
+                                       reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                       subsample=self.subsample,  subsample_freq = self.subsample_freq,
+                                       neg_bagging_fraction = neg_bagging_fraction,
                                        min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                        verbose=-1)
 
@@ -46,94 +77,93 @@ class Lgbm(Lightgbm):
                 raise ValueError("Cost sensitive basic LGBM is not implemented")
 
         if metric == 'lambdarank':
-            self.n = int(n * len(y))
+            self.n = int(n_ratio * len(y))
 
             model = lgb.LGBMRanker(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample, lambdarank_truncation_level=self.n,
-                                   lambdarank_norm=False,
+                                   reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
+                                   lambdarank_truncation_level=self.n, lambdarank_norm=False,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective='lambdarank')
 
         if metric == 'arp':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.arp)
-
-            self.arp_max = PerformanceMetrics.performance_metrics_arp(y, y, maximum=True)
 
 
         if metric == 'lambdarank_1':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.lambdarank)
 
-            n_ones = np.count_nonzero(y)
-            n_zeros = len(y) - n_ones
-
-            n_ones = int(np.sum(y))
-            array_ones = np.ones(n_ones)
-            array_linspace = np.linspace(0, n_ones - 1, n_ones)
-            self.lambdmax_max = np.sum((2 ** (array_ones) - 1) / (np.log2(array_linspace + 2)))
 
         if metric == 'dcg':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.dcg)
-            self.ndcg_max = PerformanceMetrics.performance_metrics_dcg(y, y, maximum=True)
 
         if metric == 'roc_auc':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.roc_auc)
-            self.roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y, y, maximum=True)
 
         if metric == 'ap':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.ap)
 
-            self.ap_max = PerformanceMetrics.performance_metrics_ap(y, y, maximum=True)
 
         if metric == 'ep':
 
+            if self.sampling_strategy == None:
+                lengh = len(y_clas)
+            else:
+                lengh = math.ceil(np.count_nonzero(y_clas)*((1/self.sampling_strategy)+1))
+
             self.p_ep = p_ep
-            self.n_c_ep = n_c_ep
+            self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
 
             disc = 0
-            discounter = np.zeros(len(y))
+            discounter = np.zeros(lengh)
 
-            for i in range(len(y), 0, -1):
+            for i in range(lengh, 0, -1):
 
-                if i < len(y):
-                    top = beta.cdf((i + 0.5) / len(y), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                if i < lengh:
+                    top = beta.cdf((i + 0.5) / lengh, self.p_ep * self.n_ep, self.n_ep * (1 - self.p_ep))
                 else:
                     top = 1
 
-                bot = beta.cdf((i - 0.5) / len(y), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
+                bot = beta.cdf((i - 0.5) / lengh, self.p_ep * self.n_ep, self.n_ep * (1 - self.p_ep))
 
                 prob = top - bot
 
                 disc = disc + (prob / (i))
                 discounter[i - 1] = disc
 
-            self.discounter = discounter*len(y)
-            self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_c_ep, maximum=True)
-
+            self.discounter = discounter*lengh
 
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                   reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
                                    subsample=self.subsample,
+                                      subsample_freq=self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.ep)
 
@@ -143,23 +173,22 @@ class Lgbm(Lightgbm):
 
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                    reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.rbp)
 
-            self.rbp_max = PerformanceMetrics.performance_metrics_rbp(y, y, self.p_rbp, maximum=True)
-
         if metric == 'precision':
 
-            self.n_prec = int(p_prec*len(y))
+            self.n_prec = int(p_prec*len(y_clas))
 
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   subsample=self.subsample,
+                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq = self.subsample_freq,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.precision)
 
-            self.precision_max = PerformanceMetrics.performance_metrics_precision(y, y, self.n_prec, maximum=True)
 
         # Disable
         def blockPrint():
@@ -170,13 +199,13 @@ class Lgbm(Lightgbm):
             sys.stdout = sys.__stdout__
 
         # Output of Lightgbm is kinda annoying, and verbose is bugged
-        blockPrint()
+        #blockPrint()
         if metric != 'basic':
             #model.fit(X, y, group=[X.shape[0]])
             model.fit(X, y)
         if metric == 'basic':
             model.fit(X, y)
-        enablePrint()
+        #enablePrint()
 
         endtimer = timer()
 

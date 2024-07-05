@@ -15,7 +15,7 @@ class ENSEMImb:
 
     def predict(self, model, X_predict):
 
-        scores = model.predict(X_predict)
+        scores = model.predict_proba(X_predict)
 
         return scores
 
