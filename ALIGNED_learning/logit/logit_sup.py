@@ -4,6 +4,7 @@ import random
 from .logit import Lgt
 from scipy.stats import betabinom, beta
 from ALIGNED_learning.design.performance_metrics import PerformanceMetrics
+import math
 
 
 class Logit(Lgt):
@@ -12,7 +13,7 @@ class Logit(Lgt):
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
-    def fitting(self, X, y, y_clas, init_theta, metric, n_ratio = None, p_prec=None, p_rbp=None, p_ep=None, n_ep=None):
+    def fitting(self, X, y, y_clas, init_theta, metric, n_ratio = None, p_prec=None, p_rbp=None, p_ep=None):
 
         random.seed(2290)
         np.random.seed(2290)
@@ -76,19 +77,20 @@ class Logit(Lgt):
             self.theta, func_min = self.optimization_rank(obj_func, init_theta)
 
         if metric == 'ep':
+
             self.p_ep = p_ep
-            self.n_ep = n_ep
+            self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
 
             discounter = np.zeros(len(y))
             disc = 0
             for i in range(len(y), 0, -1):
 
                 if i < len(y):
-                    top = beta.cdf((i + 0.5) / len(y), p_ep * n_ep, n_ep * (1 - p_ep))
+                    top = beta.cdf((i + 0.5) / len(y), self.p_ep * self.n_ep, self.n_ep * (1 - self.p_ep))
                 else:
                     top = 1
 
-                bot = beta.cdf((i - 0.5) / len(y), p_ep * n_ep, n_ep * (1 - p_ep))
+                bot = beta.cdf((i - 0.5) / len(y), self.p_ep * self.n_ep, self.n_ep * (1 - self.p_ep))
 
                 prob = top - bot
 

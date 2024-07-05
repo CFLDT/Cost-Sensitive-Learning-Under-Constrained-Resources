@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_5'
+experiments = 'experiment_1'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -191,17 +191,17 @@ def get_par_dict(optimisation_metric):
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50],  # [50, 100],
+                         "n_estimators": [50, 100],  # [50, 100],
                          "lambd": [0],
                          "alpha": [0],
-                         "learning_rate": [0.01],  # [0.01, 0.001],
+                         "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
                          "subsample": [1],
                          "subsample_freq": [None],
-                         "sampling_strategy": [1],  #[0.5, 1]
+                         "sampling_strategy": [0.5, 1],  #[0.5, 1]
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
-                         "sigma": [0.5, 1],  #[1, 10]   # 1 for validation 'binary' and 'lambdarank'
+                         "sigma": [1],  #[1]   # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": ['lambdaloss'],  # 'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
                          "metric": optimisation_metric},
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
