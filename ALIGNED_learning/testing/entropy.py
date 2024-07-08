@@ -91,9 +91,6 @@ def inferred_p_calculator(y_pred, y_true, metric, n_relevant_value, p_ep = None,
         disc = 0
 
         for i in range(len(y_true), 0, -1):
-            #prob = betabinom.pmf(i, len(y_true), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
-            #prob = beta.pdf(i/len(y_true), p_ep * n_c_ep, n_c_ep * (1 - p_ep))
-
 
             if i < len(y_true):
                 top = beta.cdf((i + 0.5) / len(y_true), p_ep * n_c_ep, n_c_ep * (1 - p_ep))

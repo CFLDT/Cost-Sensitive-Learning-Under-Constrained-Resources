@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_5'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -94,7 +94,6 @@ def setting_creater(df, feature_names, data_majority_undersample_train, train_pe
         names = []
 
         for train_period in train_periods:
-
 
             train_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]))
 
@@ -178,21 +177,21 @@ def setting_creater(df, feature_names, data_majority_undersample_train, train_pe
            test_index_list, name_list, df_experiment_info
 
 
-# pas self.max zaken aan zoals subsample...
 def get_par_dict(optimisation_metric):
     par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
-                            'n_p_ep': 100,
+                            'n_p_ep_test': 100,
+                            'p_ep_val': 0.3,
                             'n_n_found':100},
-                'Logit': {'lambd': [0],
-                          'sigma': [1, 10],
+                'Logit': {'lambd': [0, 0.1],
+                          'sigma': [1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0],
+                         "lambd": [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
@@ -234,16 +233,10 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 train_period_list = [[[1995, 2000]], [[1996, 2001]], [[1997, 2002]], [[1998, 2003]], [[1999, 2004]], [[2000, 2005]]]
 test_period_list = [[[None, None]], [[2004, 2004]], [[2005, 2005]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
 validation_list = [True, False, False, False, False, False]
-#
-# train_period_list = [[[1990, 1995]], [[1990, 1996]], [[1990, 1997]], [[1990, 1998]]]
-# test_period_list = [[[None, None]], [[1999, 1999]], [[2000, 2000]], [[2001, 2001]]]
-# validation_list = [True, False, False, False]
 
 
 feature_importance = False
 stakeholder = 'Regulator'
-
-
 
 
 if 'experiment_1' in experiments:

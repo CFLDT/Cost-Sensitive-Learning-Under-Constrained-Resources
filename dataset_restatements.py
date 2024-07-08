@@ -4,6 +4,7 @@ from ALIGNED_learning.testing import performance_check
 from pathlib import Path
 import random
 import warnings
+import math
 
 warnings.filterwarnings("ignore")
 
@@ -22,8 +23,8 @@ df_restatement_2 = pd.read_csv(path, index_col=0)
 
 df_restatement = pd.concat([df_restatement_1, df_restatement_2], ignore_index=True)
 
-def setting_creater(df, feature_names, data_majority_undersample, train_period_list,
-                    test_period_list, stakeholder, train_frac_list):
+def setting_creater(df, feature_names, data_majority_undersample_train, train_period_list,
+                    test_period_list, stakeholder, validation_list):
     train_index_list = []
     validation_index_list = []
     test_index_list = []
@@ -51,11 +52,13 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
     """
     undersampling
     """
+    #
+    # if data_majority_undersample is not None:
+    #     df = df.drop(
+    #         df.query('Res_per == 0').sample(frac=data_majority_undersample, random_state=2290).index)
+    #     df = df.reset_index(drop=True)
 
-    if data_majority_undersample is not None:
-        df = df.drop(
-            df.query('Res_per == 0').sample(frac=data_majority_undersample, random_state=2290).index)
-        df = df.reset_index(drop=True)
+    df = df.reset_index(drop=True)
 
     """
     train/val/test split
@@ -82,7 +85,7 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
     m_score = df_m_score['M_score']
     f_score = df_f_score['F_score']
 
-    for train_periods, test_periods, train_frac in zip(train_period_list, test_period_list, train_frac_list):
+    for train_periods, test_periods, validations in zip(train_period_list, test_period_list, validation_list):
 
         train_indexs = []
         validation_indexs = []
@@ -91,43 +94,27 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
 
         for train_period in train_periods:
 
-            financial_misconduct_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]) & (
-                    labeled_fraud_indicator == 1))
-            non_label_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]) & (
-                    labeled_fraud_indicator == 0))
+            train_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]))
 
-            financial_misconduct = df[financial_misconduct_bool]
-            non_label = df[non_label_bool]
+            if validations == True:
+                val_bool = ((df['Year'] >= train_period[1]+3) & (df['Year'] <= train_period[1] + 3))
+            else:
+                val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
 
-            df_per_fin_mis_train_x = pd.Series(financial_misconduct.groupby('CIK').groups.keys()).sample(
-                frac=train_frac, random_state=2290)
-            df_per_fin_mis_train = financial_misconduct[
-                financial_misconduct['CIK'].isin(df_per_fin_mis_train_x.tolist())]
 
-            df_per_fin_mis_val = financial_misconduct.drop(df_per_fin_mis_train.index)
-            df_per_fin_mis_val_x = pd.Series(df_per_fin_mis_val.groupby('CIK').groups.keys())
+            if data_majority_undersample_train is not None:
+                train_index = df.index[train_bool].tolist()
+                df_train_index = df.loc[train_index]
 
-            df_per_label_bool_train_x = pd.Series(non_label.groupby('CIK').groups.keys()).sample(frac=train_frac,
-                                                                                                 random_state=2290)
+                df_train_index = df_train_index.drop(
+                    df_train_index.query('Res_per == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
 
-            # Use all CIK in the non label train sample. Additionally include all observations of CIK in the train that are labelled.
-            # Omit all observations of CIK in the validation that are labelled
-            df_per_label_bool_train = non_label[((((non_label['CIK'].isin(df_per_label_bool_train_x.tolist())) |
-                                                   (non_label['CIK'].isin(df_per_fin_mis_train_x.tolist())))) &
-                                                 (~non_label['CIK'].isin(df_per_fin_mis_val_x.tolist())))]
+                train_index = df_train_index.index.tolist()
 
-            df_per_fin_mis_val = financial_misconduct.drop(df_per_fin_mis_train.index)
-            df_per_label_bool_val = non_label.drop(df_per_label_bool_train.index)
+            else:
 
-            train_bool_fin_mis = financial_misconduct_bool.index.isin(df_per_fin_mis_train.index)
-            train_bool_label_bool = non_label_bool.index.isin(df_per_label_bool_train.index)
-            train_bool = train_bool_fin_mis ^ train_bool_label_bool
+                train_index = df.index[train_bool].tolist()
 
-            val_bool_fin_mis = financial_misconduct_bool.index.isin(df_per_fin_mis_val.index)
-            val_bool_label_bool = non_label_bool.index.isin(df_per_label_bool_val.index)
-            val_bool = val_bool_fin_mis ^ val_bool_label_bool
-
-            train_index = df.index[train_bool].tolist()
             validation_index = df.index[val_bool].tolist()
 
             train_id = id_fraud_indenticator[train_bool]
@@ -142,8 +129,12 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
             train_indexs.append(train_index)
             validation_indexs.append(validation_index)
 
+
             for test_period in test_periods:
-                test_bool = ((df['Year'] >= test_period[0]) & (df['Year'] <= test_period[1]))
+                if test_period[0] is None:
+                    test_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
+                else:
+                    test_bool = ((df['Year'] >= test_period[0]) & (df['Year'] <= test_period[1]))
 
                 test_index = df.index[test_bool].tolist()
                 test_id = id_fraud_indenticator[test_bool]
@@ -186,105 +177,99 @@ def setting_creater(df, feature_names, data_majority_undersample, train_period_l
            test_index_list, name_list, df_experiment_info
 
 
-# pas self.max zaken aan zoals subsample...
-def get_par_dict(n_ratio, p_prec, p_rbp, p_ep, n_n_found, optimisation_metric):
-    par_dict = {'General': {'n_ratio': n_ratio,
-                            'p_prec': p_prec,
-                            'p_rbp': p_rbp,
-                            'p_ep': p_ep,
-                            'n_n_found':n_n_found},
-                'Logit': {'lambd': [0],
-                          'alpha': [0],
+def get_par_dict(optimisation_metric):
+    par_dict = {'General_val_test': {'n_ratio': 1,
+                            'n_p_prec': 100,
+                            'p_rbp': 0.9,
+                            'n_p_ep_test': 100,
+                            'p_ep_val': 0.3,
+                            'n_n_found':100},
+                'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [5],
-                         "alpha": [0.01],
-                         "lambd": [0],
-                         "learning_rate": [0.01],
+                         "n_estimators": [50, 100],  # [50, 100],
+                         "lambd": [0, 10],
+                         "alpha": [0],
+                         "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
                          "subsample": [1],
-                         "sampling_strategy": [1],
-                         "sample_freq": [0],
+                         "subsample_freq": [None],
+                         "sampling_strategy": [0.5, 1],  #[0.5, 1]
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
-                         "sigma": [1],  # 1 for validation 'binary' and 'lambdarank'
+                         "sigma": [1],  #[1]   # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": ['lambdaloss'],  # 'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
                          "metric": optimisation_metric},
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
-                'ENSImb': {"max_depth": [1],
-                           "n_estimators": [50],
-                           "learning_rate": [0.01],
-                           "sampling_strategy": [1],
+                'ENSImb': {"max_depth": [1, 5],
+                           "n_estimators": [50, 100],
+                           "learning_rate": [0.01, 0.001],
+                           "sampling_strategy": [0.5, 1],
                            "method": ['RUSBoost']}}
 
     return par_dict
 
 # Dechow
-# feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
-#                  'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
-#                  'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
+feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
+                 'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
+                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
 
 # Bao
-feature_names = ['csho', 'act', 'sstk', 'ppegt',
-                 'ap', 'che', 'prcc_c', 're',
-                 'invt', 'ceq', 'dlc', 'dp',
-                 'rect', 'cogs', 'at', 'dltis',
-                 'ib', 'dltt', 'xint', 'txt',
-                 'lct', 'sale', 'txp', 'ivao',
-                 'lt', 'ivst', 'ni', 'pstk']
+# feature_names = ['csho', 'act', 'sstk', 'ppegt',
+#                  'ap', 'che', 'prcc_c', 're',
+#                  'invt', 'ceq', 'dlc', 'dp',
+#                  'rect', 'cogs', 'at', 'dltis',
+#                  'ib', 'dltt', 'xint', 'txt',
+#                  'lct', 'sale', 'txp', 'ivao',
+#                  'lt', 'ivst', 'ni', 'pstk']
 
-methods = ['Logit', 'Lgbm', 'ENSImb', 'M_score', 'F_score']  # Logit, Lgbm, ENSImb
+
 
 # We impose 2 year gap to mitigate serial fraud issue in test set
-data_majority_undersample = 0.9
-train_period_list = [[[1995, 2001]], [[1995, 2002]], [[1995, 2003]], [[1995, 2004]], [[1995, 2005]]]
-test_period_list = [[[2004, 2004]], [[2005, 2005]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
-train_frac_list = [0.75, 1, 1, 1, 1]
+train_period_list = [[[2000, 2005]], [[2001, 2006]], [[2002, 2007]], [[2003, 2008]], [[2004, 2009]], [[2005, 2010]]]
+test_period_list = [[[None, None]], [[2009, 2009]], [[2010, 2010]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]]]
+validation_list = [True, False, False, False, False, False]
+
 
 feature_importance = False
 stakeholder = 'Regulator'
-cost_train = False
-cost_validate = False
 
-X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-name_list, df_experiment_info = \
-    setting_creater(df_restatement,
-                    feature_names=feature_names,
-                    data_majority_undersample=data_majority_undersample,
-                    train_period_list=train_period_list,
-                    test_period_list=test_period_list,
-                    stakeholder=stakeholder, train_frac_list=train_frac_list)
 
 if 'experiment_1' in experiments:
 
+    cost_train = False
+    cost_validate = False
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm']
+
     cross_val_perf_ind = 'ep'
     optimisation_metric = 'ep'
-
-    n_ratio = 1
-    p_prec = 0.1
-    p_rbp = 0.9
-    n_n_found = 100
-
-    p_ep = 0.1
-    n_c_ep = 12
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_1_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_n_found=n_n_found,
-                            optimisation_metric=[optimisation_metric])
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
-    par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.5]
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.5]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
 
-    name = 'Restatement_experiment_1_info' + '.csv'
+
+    name = 'AAER_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -296,31 +281,40 @@ if 'experiment_1' in experiments:
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
+
 if 'experiment_2' in experiments:
 
-    cross_val_perf_ind = 'arp'
-    optimisation_metric = 'basic'
+    cost_train = False
+    cost_validate = False
+    data_majority_undersample_train = 0.85
 
-    n_ratio = 1
-    p_prec = 0.1
-    p_rbp = 0.9
-    n_n_found = 100
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
 
-    p_ep = 0.1
-    n_c_ep = 12
+    methods = ['Logit']
+
+    cross_val_perf_ind = 'ep'
+    optimisation_metric = 'ep'
 
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_2_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep,n_n_found=n_n_found,
-                            optimisation_metric=[optimisation_metric])
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
 
-    name = 'Restatement_experiment_2_info' + '.csv'
+
+    name = 'AAER_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -332,33 +326,37 @@ if 'experiment_2' in experiments:
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
+
 if 'experiment_3' in experiments:
 
-    cross_val_perf_ind = 'precision'
-    optimisation_metric = 'precision'
+    cost_train = False
+    cost_validate = False
+    data_majority_undersample_train = None
 
-    n_ratio = 1
-    p_prec = 0.1
-    p_rbp = 0.9
-    n_n_found = 100
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
 
-    p_ep = 0.1
-    n_c_ep = 12
+    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+
+    cross_val_perf_ind = 'arp'
+    optimisation_metric = 'basic'
+
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
             name_list[i_1][i_2] = 'AAER_experiment_3_' + name_list[i_1][i_2]
 
-    par_dict = get_par_dict(n_ratio=n_ratio, p_prec=p_prec, p_rbp=p_rbp, p_ep=p_ep, n_n_found=n_n_found,
-                            optimisation_metric=[optimisation_metric])
-
-    par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.5]
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.5]
 
-    name = 'Restatement_experiment_3_info' + '.csv'
+    name = 'AAER_experiment_3_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -369,3 +367,212 @@ if 'experiment_3' in experiments:
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
+
+
+if 'experiment_4' in experiments:
+
+    cost_train = False
+    cost_validate = False
+    data_majority_undersample_train = 0.85
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Logit']
+
+    cross_val_perf_ind = 'arp'
+    optimisation_metric = 'basic'
+
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'AAER_experiment_4_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Logit"]["n_ratio"] = [1]
+
+    name = 'AAER_experiment_4_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate, keep_first=True)
+
+if 'experiment_5' in experiments:
+
+    cost_train = True
+    cost_validate = True
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm']
+
+    cross_val_perf_ind = 'ep'
+    optimisation_metric = 'ep'
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
+
+    name = 'AAER_experiment_5_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate, keep_first=True)
+
+if 'experiment_6' in experiments:
+
+    cost_train = True
+    cost_validate = True
+    data_majority_undersample_train = 0.85
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        data_majority_undersample_train=data_majority_undersample_train,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Logit']
+
+    cross_val_perf_ind = 'ep'
+    optimisation_metric = 'ep'
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'AAER_experiment_6_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Logit"]["n_ratio"] = [1]
+    par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
+
+    name = 'AAER_experiment_6_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate, keep_first=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# if 'experiment_5' in experiments:
+#
+#     methods = ['Logit', 'Lgbm']
+#
+#
+#     cross_val_perf_ind = 'precision'
+#     optimisation_metric = 'precision'
+#
+#     for i_1 in range(len(name_list)):
+#         for i_2 in range(len(name_list[i_1])):
+#             name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
+#
+#     par_dict = get_par_dict(n_ratio=n_ratio, n_p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep=n_p_ep, n_n_found = n_n_found,
+#                             optimisation_metric=[optimisation_metric])
+#
+#     par_dict["Logit"]["n_ratio"] = [1]
+#     par_dict["Logit"]["p_prec"] = [0.1, 0.3, 0.5]
+#
+#     par_dict["Lgbm"]["n_ratio"] = [1]
+#     par_dict["Lgbm"]["p_prec"] = [0.1, 0.3, 0.5]
+#
+#
+#     name = 'AAER_experiment_5_info' + '.csv'
+#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+#
+#     performance_check(methods=methods,
+#                       par_dict_init=par_dict,
+#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+#                       name_list=name_list, train_list=train_index_list,
+#                       validate_list=validation_index_list, test_list=test_index_list,
+#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+#                       cost_train=cost_train,
+#                       cost_validate=cost_validate, keep_first=True)

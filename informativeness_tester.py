@@ -20,10 +20,11 @@ n_t = 100
 p_prec = 0.1
 p_ep = 0.5
 n_c_ep = math.ceil(1/(p_ep * (1-p_ep)))
+#n_c_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 p_rbp = 0.9
 
 original_metric = 'ep'
-target_metric = 'ap'
+target_metric = 'uplift'
 
 label_noise = False
 label_noise_0 = 0
