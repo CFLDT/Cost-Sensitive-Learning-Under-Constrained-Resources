@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_5'
+experiments = 'experiment_4'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -25,7 +25,7 @@ df_aaer_2 = pd.read_csv(path, index_col=0)
 df_aaer = pd.concat([df_aaer_1, df_aaer_2], ignore_index=True)
 
 
-def setting_creater(df, feature_names, data_majority_undersample_train, train_period_list,
+def setting_creater(df, feature_names, train_period_list,
                     test_period_list, stakeholder, validation_list):
     train_index_list = []
     validation_index_list = []
@@ -103,18 +103,18 @@ def setting_creater(df, feature_names, data_majority_undersample_train, train_pe
                 val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
 
 
-            if data_majority_undersample_train is not None:
-                train_index = df.index[train_bool].tolist()
-                df_train_index = df.loc[train_index]
+            # if data_majority_undersample_train is not None:
+            #     train_index = df.index[train_bool].tolist()
+            #     df_train_index = df.loc[train_index]
+            #
+            #     df_train_index = df_train_index.drop(
+            #         df_train_index.query('AAER == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
+            #
+            #     train_index = df_train_index.index.tolist()
+            #
+            # else:
 
-                df_train_index = df_train_index.drop(
-                    df_train_index.query('AAER == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
-
-                train_index = df_train_index.index.tolist()
-
-            else:
-
-                train_index = df.index[train_bool].tolist()
+            train_index = df.index[train_bool].tolist()
 
             validation_index = df.index[val_bool].tolist()
 
@@ -181,23 +181,22 @@ def get_par_dict(optimisation_metric):
     par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
-                            'n_p_ep_test': 100,
-                            'p_ep_val': 0.3,
+                            'n_p_ep': 100,
                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
+                          'undersample': [0.05, 0.1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0, 10],
+                         "lambd": [0],
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "subsample": [1],
-                         "subsample_freq": [None],
-                         "sampling_strategy": [0.5, 1],  #[0.5, 1]
+                         "sample_subsample_undersample": [[0.01, None], [0.05, None], [0.01,1], [0.05,1]],
+                         "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
                          "sigma": [1],  #[1]   # 1 for validation 'binary' and 'lambdarank'
@@ -249,7 +248,6 @@ if 'experiment_1' in experiments:
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
@@ -287,13 +285,11 @@ if 'experiment_2' in experiments:
 
     cost_train = False
     cost_validate = False
-    data_majority_undersample_train = 0.85
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
@@ -338,14 +334,13 @@ if 'experiment_3' in experiments:
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
 
     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
-    cross_val_perf_ind = 'arp'
+    cross_val_perf_ind = 'ap'
     optimisation_metric = 'basic'
 
 
@@ -374,20 +369,18 @@ if 'experiment_4' in experiments:
 
     cost_train = False
     cost_validate = False
-    data_majority_undersample_train = 0.85
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
 
     methods = ['Logit']
 
-    cross_val_perf_ind = 'arp'
+    cross_val_perf_ind = 'ap'
     optimisation_metric = 'basic'
 
 
@@ -421,7 +414,6 @@ if 'experiment_5' in experiments:
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
@@ -456,13 +448,11 @@ if 'experiment_6' in experiments:
 
     cost_train = True
     cost_validate = True
-    data_majority_undersample_train = 0.85
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_aaer,
                         feature_names=feature_names,
-                        data_majority_undersample_train=data_majority_undersample_train,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)

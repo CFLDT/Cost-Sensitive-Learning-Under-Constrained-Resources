@@ -8,12 +8,13 @@ from sklearn.linear_model import LogisticRegression
 class MethodLearner:
 
     @staticmethod
-    def logit(par_dict_logit, X_train, y_train,y_train_clas):
+    def logit(par_dict_logit, X_train, y_train, y_train_clas):
 
         lambd = par_dict_logit.get("lambd")
         metric = par_dict_logit.get("metric")
         sigma = par_dict_logit.get("sigma")
         indic_approx = par_dict_logit.get("indic_approx")
+        undersample = par_dict_logit.get("undersample")
 
         n_ratio = par_dict_logit.get("n_ratio")
         p_rbp = par_dict_logit.get("p_rbp")
@@ -29,7 +30,7 @@ class MethodLearner:
             #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1])
 
 
-        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx)
+        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, undersample=undersample)
         logist.fitting(X_train, y_train, y_train_clas, init_theta, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
 
         return logist
@@ -44,9 +45,10 @@ class MethodLearner:
         reg_alpha = par_dict_lgbm.get("alpha")
         learning_rate = par_dict_lgbm.get("learning_rate")
         colsample_bytree = par_dict_lgbm.get("colsample_bytree")
-        subsample = par_dict_lgbm.get("subsample")
+        sample = par_dict_lgbm.get("sample_subsample_undersample")
+        subsample = sample[0]
+        undersample = sample[1]
         subsample_freq = par_dict_lgbm.get("subsample_freq")
-        sampling_strategy = par_dict_lgbm.get("sampling_strategy")
         min_child_samples = par_dict_lgbm.get("min_child_samples")
         min_child_weight = par_dict_lgbm.get("min_child_weight")
         sigma = par_dict_lgbm.get("sigma")
@@ -60,19 +62,10 @@ class MethodLearner:
         p_prec = par_dict_lgbm.get("p_prec")
 
 
-        # if sampling_strategy is None:
-        #     neg_bagging_fraction = 1
-        #
-        # if sampling_strategy is not None:
-        #     n_majority = np.count_nonzero(y_train) / sampling_strategy
-        #     neg_bagging_fraction = n_majority / (len(y_train) - np.count_nonzero(y_train))
-        #     neg_bagging_fraction = min(neg_bagging_fraction,1)
-
-
         lgboost = ab.Lgbm(n_estimators=n_estimators, num_leaves=num_leaves, reg_lambda=reg_lambda, reg_alpha=reg_alpha,
-                       learning_rate=learning_rate, colsample_bytree = colsample_bytree, subsample=subsample, subsample_freq=subsample_freq,
-                          sampling_strategy=sampling_strategy, min_child_samples=min_child_samples,
-                       min_child_weight=min_child_weight, sigma=sigma, indic_approx=indic_approx)
+                          learning_rate=learning_rate, colsample_bytree = colsample_bytree, subsample=subsample, subsample_freq=subsample_freq,
+                          undersample=undersample, min_child_samples=min_child_samples,
+                          min_child_weight=min_child_weight, sigma=sigma, indic_approx=indic_approx)
 
         lgbst_train, time = lgboost.fitting(X_train, y_train, y_train_clas, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
 

@@ -9,7 +9,9 @@ import math
 
 class Logit(Lgt):
 
-    def __init__(self, lambd, sigma, indic_approx, theta=None):
+    def __init__(self, lambd, sigma, indic_approx, undersample, theta=None):
+
+        self.undersample = undersample
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
@@ -20,8 +22,14 @@ class Logit(Lgt):
 
         starttimer = timer()
 
-        self.n = int(n_ratio * len(y))
+        if self.undersample is not None:
+            all_ind = np.arange(len(y_clas))
+            ind_0 = np.random.choice(all_ind, size=int(np.rint(self.undersample * all_ind.shape[0])), replace=False)
+            X = X[ind_0,:]
+            y = y[ind_0]
 
+
+        self.n = int(n_ratio * len(y))
         div = 1 / X.shape[0]
 
         if metric == 'basic':

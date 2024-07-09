@@ -118,7 +118,7 @@ class Lightgbm:
 
     def arp(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -152,7 +152,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -169,7 +169,7 @@ class Lightgbm:
 
     def lambdarank(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -211,7 +211,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -228,7 +228,7 @@ class Lightgbm:
 
     def dcg(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -266,7 +266,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -283,7 +283,7 @@ class Lightgbm:
 
     def roc_auc(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -338,7 +338,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -355,7 +355,7 @@ class Lightgbm:
 
     def ap(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -412,7 +412,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -429,7 +429,7 @@ class Lightgbm:
 
     def ep(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -478,7 +478,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -495,7 +495,7 @@ class Lightgbm:
 
     def rbp(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -536,7 +536,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
@@ -553,7 +553,7 @@ class Lightgbm:
 
     def precision(self, y_true, y_pred):
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
             hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
 
@@ -603,7 +603,7 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if self.sampling_strategy != None:
+        if ((self.undersample is not None) or (self.subsample is not None)):
             grad_1.flat[self.indices_list[self.it_index]] = grad
             hess_1.flat[self.indices_list[self.it_index]] = hess
 
