@@ -14,7 +14,7 @@ class MethodLearner:
         metric = par_dict_logit.get("metric")
         sigma = par_dict_logit.get("sigma")
         indic_approx = par_dict_logit.get("indic_approx")
-        undersample = par_dict_logit.get("undersample")
+        subsample = par_dict_logit.get("subsample")
 
         n_ratio = par_dict_logit.get("n_ratio")
         p_rbp = par_dict_logit.get("p_rbp")
@@ -30,7 +30,7 @@ class MethodLearner:
             #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1])
 
 
-        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, undersample=undersample)
+        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, subsample=subsample)
         logist.fitting(X_train, y_train, y_train_clas, init_theta, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
 
         return logist
@@ -72,20 +72,20 @@ class MethodLearner:
         return lgboost, lgbst_train
 
     @staticmethod
-    def ensimb(par_dict, X_clas_train, s_train):
+    def ensimb(par_dict, X_clas_train, y_train):
 
         max_depth = par_dict.get("max_depth")
         n_estimators = par_dict.get("n_estimators")
         learning_rate = par_dict.get("learning_rate")
         ensemble_method = par_dict.get("method")
-        sampling_strategy = par_dict.get("sampling_strategy")
+        undersample = par_dict.get("undersample")
 
-        if sampling_strategy == None:
-            sampling_strategy = np.sum(s_train) / (np.sum(1 - s_train))
+        if undersample == None:
+            undersample = np.sum(y_train) / (np.sum(1 - y_train))
 
         ensimb = ab.ensimb_sup.ENSMImb(n_estimators=n_estimators, max_depth=max_depth,
-                         learning_rate=learning_rate, sampling_strategy=sampling_strategy)
+                                       learning_rate=learning_rate, undersample=undersample)
 
-        ensbimb_train, time = ensimb.fitting(X_clas_train, s_train, ensemble_method=ensemble_method)
+        ensbimb_train, time = ensimb.fitting(X_clas_train, y_train, ensemble_method=ensemble_method)
 
         return ensimb, ensbimb_train

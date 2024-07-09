@@ -9,9 +9,9 @@ import math
 
 class Logit(Lgt):
 
-    def __init__(self, lambd, sigma, indic_approx, undersample, theta=None):
+    def __init__(self, lambd, sigma, indic_approx, subsample, theta=None):
 
-        self.undersample = undersample
+        self.subsample = subsample
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
@@ -22,9 +22,9 @@ class Logit(Lgt):
 
         starttimer = timer()
 
-        if self.undersample is not None:
+        if self.subsample is not None:
             all_ind = np.arange(len(y_clas))
-            ind_0 = np.random.choice(all_ind, size=int(np.rint(self.undersample * all_ind.shape[0])), replace=False)
+            ind_0 = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
             X = X[ind_0,:]
             y = y[ind_0]
 
@@ -50,7 +50,7 @@ class Logit(Lgt):
 
         if metric == 'arp':
 
-            self.arp_max = PerformanceMetrics.performance_metrics_arp(y, y, maximum=True)
+            #self.arp_max = PerformanceMetrics.performance_metrics_arp(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.arp(theta, X, y)
@@ -59,7 +59,7 @@ class Logit(Lgt):
 
         if metric == 'roc_auc':
 
-            self.roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y, y, maximum=True)
+            #self.roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.roc_auc(theta, X, y)
@@ -68,7 +68,7 @@ class Logit(Lgt):
 
         if metric == 'ap':
 
-            self.ap_max = PerformanceMetrics.performance_metrics_ap(y, y, maximum=True)
+            #self.ap_max = PerformanceMetrics.performance_metrics_ap(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.ap(theta, X, y)
@@ -77,7 +77,7 @@ class Logit(Lgt):
 
         if metric == 'dcg':
 
-            self.ndcg_max = PerformanceMetrics.performance_metrics_dcg(y, y, maximum=True)
+            #self.ndcg_max = PerformanceMetrics.performance_metrics_dcg(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.dcg(theta, X, y)
@@ -107,7 +107,7 @@ class Logit(Lgt):
                 discounter[i - 1] = disc
 
             self.discounter = discounter*len(y)
-            self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_ep, maximum=True)
+            #self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_ep, maximum=True)
 
             def obj_func(theta):
                 return self.ep(theta, X, y)
@@ -116,7 +116,7 @@ class Logit(Lgt):
 
         if metric == 'rbp':
             self.p_rbp = p_rbp
-            self.rbp_max = PerformanceMetrics.performance_metrics_rbp(y, y, self.p_rbp, maximum=True)
+            #self.rbp_max = PerformanceMetrics.performance_metrics_rbp(y, y, self.p_rbp, maximum=True)
 
             def obj_func(theta):
                 return self.rbp(theta, X, y)
@@ -125,7 +125,7 @@ class Logit(Lgt):
 
         if metric == 'precision':
             self.n_prec = int(p_prec*len(y))
-            self.precision_max = PerformanceMetrics.performance_metrics_precision(y, y, self.n_prec, maximum=True)
+            #self.precision_max = PerformanceMetrics.performance_metrics_precision(y, y, self.n_prec, maximum=True)
 
             def obj_func(theta):
                 return self.precision(theta, X, y)

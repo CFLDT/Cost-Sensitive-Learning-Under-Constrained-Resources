@@ -40,22 +40,24 @@ class Lgbm(Lightgbm):
         indices_0 = np.where(y_clas == 0)[0]
         indices_1 = np.where(y_clas == 1)[0]
         all_ind = np.arange(len(y_clas))
-        ind_undersample = list(all_ind)
-        ind_subsample = list(all_ind)
 
         if ((self.undersample is not None) or (self.subsample is not None)):
             self.indices_list = []
             self.it_index = 0
             for i in range(self.n_estimators):
-                if self.undersample is not None:
+                if ((self.undersample is not None) and (self.subsample is None)):
                     ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])), replace=False)
-                    ind_undersample = list(np.append(indices_1, ind_0))
-                    #ind_d = [x for x in all_ind if x not in ind_all]
-                if self.subsample is not None:
+                    ind_tr = list(np.append(indices_1, ind_0))
+                if ((self.undersample is None) and (self.subsample is not None)):
                     ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
-                    ind_subsample = list(ind)
+                    ind_tr = list(ind)
+                if ((self.undersample is not None) and (self.subsample is not None)):
+                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])), replace=False)
+                    ind_a = list(np.append(indices_1, ind_0))
+                    ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
 
-                ind_tr = list(set(ind_undersample) & set(ind_subsample))
+                    #ind_tr = list(set(ind_undersample) & set(ind_subsample))
+                    #ind_tr = [value for value in ind_undersample if value in ind_subsample]
                 self.indices_list.append(ind_tr)
 
 
@@ -133,10 +135,10 @@ class Lgbm(Lightgbm):
 
         if metric == 'ep':
 
-            if self.undersample == None:
+            if ((self.undersample is None) and (self.subsample is None)):
                 lengh = len(y_clas)
             else:
-                lengh = math.ceil(np.count_nonzero(y_clas) * ((1 / self.undersample) + 1))
+                lengh = len(ind_tr)
 
             self.p_ep = p_ep
             self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))

@@ -185,7 +185,7 @@ def get_par_dict(optimisation_metric):
                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
-                          'undersample': [0.3],
+                          'subsample': [0.05, 0.1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
@@ -206,7 +206,7 @@ def get_par_dict(optimisation_metric):
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
                            "learning_rate": [0.01, 0.001],
-                           "sampling_strategy": [0.5, 1],
+                           "undersample": [0.5, 1],
                            "method": ['RUSBoost']}}
 
     return par_dict

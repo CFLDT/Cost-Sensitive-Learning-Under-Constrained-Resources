@@ -81,7 +81,7 @@ task_dict = {'name': 'Toy_Data_1'}
 
 opt_par_dict = {'Logit': {'lambd': 0,
                           'sigma': 1,
-                          'undersample': None,
+                          'subsample': None,
                           'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
                           'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
@@ -90,7 +90,7 @@ opt_par_dict = {'Logit': {'lambd': 0,
                          "lambd": 0,
                          "alpha": 0,
                          "learning_rate": 0.01,
-                         "sample_subsample_undersample": [None,1],
+                         "sample_subsample_undersample": [0.5,1],
                          "subsample_freq": 1,
                          "min_child_samples": 0,
                          "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'

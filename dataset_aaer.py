@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_5'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -185,28 +185,28 @@ def get_par_dict(optimisation_metric):
                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
-                          'undersample': [0.05, 0.1],
+                          'subsample': [0.05, 0.1],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0],
+                         "lambd": [0], # [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.01, None], [0.05, None], [0.01,1], [0.05,1]],
+                         "sample_subsample_undersample": [[0.01, None], [0.05, None], [0.5,1], [None, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
-                         "sigma": [1],  #[1]   # 1 for validation 'binary' and 'lambdarank'
+                         "sigma": [1],    # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": ['lambdaloss'],  # 'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
                          "metric": optimisation_metric},
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
                            "learning_rate": [0.01, 0.001],
-                           "sampling_strategy": [0.5, 1],
+                           "undersample": [0.5, 1],
                            "method": ['RUSBoost']}}
 
     return par_dict
