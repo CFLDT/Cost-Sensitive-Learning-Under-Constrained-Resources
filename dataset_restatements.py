@@ -176,13 +176,13 @@ def setting_creater(df, feature_names, train_period_list,
     return X, y, y_c, m_score, f_score, train_index_list, validation_index_list, \
            test_index_list, name_list, df_experiment_info
 
-
 def get_par_dict(optimisation_metric):
     par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_n_found':100},
+                             'p_ep_val': 0.1,
+                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
                           'subsample': [0.05, 0.1],
@@ -191,15 +191,15 @@ def get_par_dict(optimisation_metric):
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0, 10],
+                         "lambd": [0], # [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[None,1]],
+                         "sample_subsample_undersample": [[0.05, None], [0.5, 1], [None, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
-                         "sigma": [1],  #[1]   # 1 for validation 'binary' and 'lambdarank'
+                         "sigma": [1],    # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": ['lambdaloss'],  # 'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
                          "metric": optimisation_metric},
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
@@ -210,6 +210,7 @@ def get_par_dict(optimisation_metric):
                            "method": ['RUSBoost']}}
 
     return par_dict
+
 
 # Dechow
 feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
@@ -258,7 +259,7 @@ if 'experiment_1' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_1_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_1_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
@@ -267,7 +268,7 @@ if 'experiment_1' in experiments:
     par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
 
 
-    name = 'AAER_experiment_1_info' + '.csv'
+    name = 'Restatement_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -301,7 +302,7 @@ if 'experiment_2' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_2_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_2_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
@@ -310,7 +311,7 @@ if 'experiment_2' in experiments:
     par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
 
 
-    name = 'AAER_experiment_2_info' + '.csv'
+    name = 'Restatement_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -345,13 +346,13 @@ if 'experiment_3' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_3_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_3_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
 
-    name = 'AAER_experiment_3_info' + '.csv'
+    name = 'Restatement_experiment_3_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -385,13 +386,13 @@ if 'experiment_4' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_4_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_4_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
 
-    name = 'AAER_experiment_4_info' + '.csv'
+    name = 'Restatement_experiment_4_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -424,14 +425,14 @@ if 'experiment_5' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_5_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
     par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
 
-    name = 'AAER_experiment_5_info' + '.csv'
+    name = 'Restatement_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -463,14 +464,14 @@ if 'experiment_6' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_6_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Restatement_experiment_6_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
     par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
 
-    name = 'AAER_experiment_6_info' + '.csv'
+    name = 'Restatement_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -543,7 +544,7 @@ if 'experiment_6' in experiments:
 #
 #     for i_1 in range(len(name_list)):
 #         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
+#             name_list[i_1][i_2] = 'Restatement_experiment_5_' + name_list[i_1][i_2]
 #
 #     par_dict = get_par_dict(n_ratio=n_ratio, n_p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep=n_p_ep, n_n_found = n_n_found,
 #                             optimisation_metric=[optimisation_metric])
@@ -555,7 +556,7 @@ if 'experiment_6' in experiments:
 #     par_dict["Lgbm"]["p_prec"] = [0.1, 0.3, 0.5]
 #
 #
-#     name = 'AAER_experiment_5_info' + '.csv'
+#     name = 'Restatement_experiment_5_info' + '.csv'
 #     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 #
 #     performance_check(methods=methods,

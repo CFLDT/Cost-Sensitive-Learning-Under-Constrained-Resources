@@ -354,7 +354,7 @@ class Lgt:
 
         # Base Value
 
-        ep_max = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_c_ep, maximum=True)
+        ep_max = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_ep, maximum=True)
 
         # Lambda_ij calculation
 

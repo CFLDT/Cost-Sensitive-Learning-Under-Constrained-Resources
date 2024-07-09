@@ -63,15 +63,15 @@ class Lgbm(Lightgbm):
 
         if metric == 'basic':
 
+            if self.undersample is None:
+                neg_bagging_fraction = 1
+
+            if self.undersample is not None:
+                n_majority = np.count_nonzero(y) / self.undersample
+                neg_bagging_fraction = n_majority / (len(y) - np.count_nonzero(y))
+                neg_bagging_fraction = min(neg_bagging_fraction, 1)
+
             if np.array_equal(y, y.astype(bool)) == True:
-
-                if self.undersample is None:
-                    neg_bagging_fraction = 1
-
-                if self.undersample is not None:
-                    n_majority = np.count_nonzero(y) / self.undersample
-                    neg_bagging_fraction = n_majority / (len(y) - np.count_nonzero(y))
-                    neg_bagging_fraction = min(neg_bagging_fraction,1)
 
                 model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                        learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
@@ -83,8 +83,13 @@ class Lgbm(Lightgbm):
 
             else:
 
-                raise ValueError("Cost sensitive basic LGBM is not implemented")
-
+                model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
+                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                       reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                       subsample=self.subsample,  subsample_freq = self.subsample_freq,
+                                       neg_bagging_fraction = neg_bagging_fraction,
+                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                       verbose=-1)
         if metric == 'lambdarank':
             self.n = int(n_ratio * len(y))
 
