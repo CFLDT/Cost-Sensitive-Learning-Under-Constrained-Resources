@@ -21,26 +21,23 @@ df_AAER_firm_year['CIK'] = df_AAER_firm_year['CIK'].astype('Int64')
 df_AAER_firm_year = df_AAER_firm_year[['AAER_ID', 'Year', 'CIK']]
 df_AAER_firm_year = df_AAER_firm_year.dropna()
 df_AAER_firm_year = df_AAER_firm_year.sort_values(by=['CIK', 'AAER_ID']).reset_index(drop=True)
+minim = df_AAER_firm_year.groupby(['AAER_ID'])['Year'].min().reset_index()
+minim = minim.rename(columns={"Year": "Begin_year"})
+df_AAER_firm_year = pd.merge(df_AAER_firm_year, minim, how='left', on=['AAER_ID'])
+
 
 #If multiple AAERS affect the same firm in the same year, we keep the one with lowest AAER_ID (the oldest)
 df_AAER_firm_year = df_AAER_firm_year.drop_duplicates(subset=['CIK', 'AAER_ID', 'Year'], keep='first')
 
-df_AAER_firm_year_first = df_AAER_firm_year.copy()
-df_AAER_firm_year_first = df_AAER_firm_year_first.rename(columns={"AAER_ID": "AAER_ID_first"})
-df_AAER_firm_year_first = df_AAER_firm_year_first.drop_duplicates(subset=['AAER_ID_first'], keep='first')
-
 # Merge with compustat data
 
 df = company_codes_merger_cik(df_AAER_firm_year)
-df_first = company_codes_merger_cik(df_AAER_firm_year_first)
-df = pd.merge(df, df_first, how='left', on=['Year', 'CIK'])
 
 df['AAER'] = np.where(df['AAER_ID'].isnull(), 0, 1)
-df['AAER_first'] = np.where(df['AAER_ID_first'].isnull(), 0, 1)
+
 
 print('The number of original AAERs: ' + str(df_AAER_firm_year.shape[0]))
 print('The number of AAERs merged using CIK: ' + str(df[df['AAER'] == 1].shape[0]))
-print('The number of first AAERs merged using CIK: ' + str(df[df['AAER_first'] == 1].shape[0]))
 print(
     'The number of distinct AAER ID: original AAER: ' + str(df_AAER_firm_year['AAER_ID'].drop_duplicates().shape[0]))
 print('The number of distinct AAER firms: merged using CIK: ' + str(
@@ -49,3 +46,5 @@ print('The number of distinct AAER firms: merged using CIK: ' + str(
 
 path = (base_path / "../csv/AAER_Data.csv").resolve()
 df.to_csv(path, index=True)
+
+

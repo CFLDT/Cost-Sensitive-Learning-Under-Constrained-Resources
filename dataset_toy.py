@@ -8,7 +8,7 @@ from ALIGNED_learning.design import DivClean
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 from sklearn.preprocessing import StandardScaler
-
+import math
 
 
 random.seed(2290)
@@ -16,8 +16,8 @@ np.random.seed(2290)
 base_path = Path(__file__).parent
 
 n_n = 200
-n_fe = 10
-n_fc = 10
+n_fe = 30
+n_fc = 30
 
 x_n_1, x_n_2 = np.random.multivariate_normal([6, 5], [[1, 0], [0, 2]], size=n_n).T
 x_fe_1, x_fe_2 = np.random.multivariate_normal([11.5, 1.5], [[0.3, 0], [0, 0.3]], size=n_fe).T
@@ -83,14 +83,14 @@ opt_par_dict = {'Logit': {'lambd': 0,
                           'sigma': 1,
                           'subsample': None,
                           'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
-                          'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
+                          'metric': 'ep'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": 5,
                          "n_estimators": 50,
                          "lambd": 0,
                          "alpha": 0,
                          "learning_rate": 0.01,
-                         "sample_subsample_undersample": [0.5,1],
+                         "sample_subsample_undersample": [0.5, 1],
                          "subsample_freq": 1,
                          "min_child_samples": 0,
                          "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -101,14 +101,23 @@ opt_par_dict = {'Logit': {'lambd': 0,
 opt_par_dict["Logit"]["n_ratio"] = 1
 opt_par_dict["Logit"]["p_prec"] = 0.1
 opt_par_dict["Logit"]["p_rbp"] = 0.8
-opt_par_dict["Logit"]["p_ep"] = 0.5
-opt_par_dict["Logit"]["n_c_ep"] = 5
+opt_par_dict["Logit"]["p_ep"] = 0.001
+opt_par_dict["Logit"]["n_c_ep"] = math.ceil(1 / (0.001 * (1 - 0.001))) #math.ceil(1 / (0.5 * (1 - 0.5)))
+
+opt_par_dict["Logit"]["p_ep"] = 0.3
+opt_par_dict["Logit"]["n_c_ep"] = math.ceil(1 / (0.3 * (1 - 0.3)))
 
 opt_par_dict["Lgbm"]["n_ratio"] = 1
 opt_par_dict["Lgbm"]["p_prec"] = 0.1
 opt_par_dict["Lgbm"]["p_rbp"] = 0.8
+opt_par_dict["Lgbm"]["p_ep"] = 0.005
+opt_par_dict["Lgbm"]["n_c_ep"] = math.ceil(1 / (0.005 * (1 - 0.005)))
+
+opt_par_dict["Lgbm"]["p_ep"] = 0.1
+opt_par_dict["Lgbm"]["n_c_ep"] = math.ceil(1 / (0.1 * (1 - 0.1)))
+
 opt_par_dict["Lgbm"]["p_ep"] = 0.5
-opt_par_dict["Lgbm"]["n_c_ep"] = 5
+opt_par_dict["Lgbm"]["n_c_ep"] = math.ceil(1 / (0.5 * (1 - 0.5)))
 
 
 # TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'

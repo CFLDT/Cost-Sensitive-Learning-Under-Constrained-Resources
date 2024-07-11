@@ -506,7 +506,7 @@ def performances(predict_prob, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_fou
     n_prec = n_p_prec
     p_ep = n_p_ep / len(y_test)
     n_ep = math.ceil(1/(p_ep * (1-p_ep)))
-    #n_ep = max(1 / (p_ep), 1 / (1 - p_ep))
+    n_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 
     try:
         roc = PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_test, n=n)

@@ -13,17 +13,15 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_5'
-
+experiments = 'experiment_1'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
-df_aaer_1 = pd.read_csv(path, index_col=0)
+df_severe_restatement_1 = pd.read_csv(path, index_col=0)
 
 path = (base_path / "data/csv/All_data_2.csv").resolve()
-df_aaer_2 = pd.read_csv(path, index_col=0)
+df_severe_restatement_2 = pd.read_csv(path, index_col=0)
 
-df_aaer = pd.concat([df_aaer_1, df_aaer_2], ignore_index=True)
-
+df_severe_restatement = pd.concat([df_severe_restatement_1, df_severe_restatement_2], ignore_index=True)
 
 def setting_creater(df, feature_names, train_period_list,
                     test_period_list, stakeholder, validation_list):
@@ -44,7 +42,8 @@ def setting_creater(df, feature_names, train_period_list,
     features and nans
     """
 
-    df = df[['AAER', 'CIK', 'Year', 'AAER_ID', 'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016', 'F_score',
+    df = df[['Res_m_per', 'CIK', 'Year', 'Restatement Key',
+             'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016', 'F_score',
              'M_score'] + feature_names]
 
     # replace infs with nan
@@ -53,11 +52,11 @@ def setting_creater(df, feature_names, train_period_list,
     """
     undersampling
     """
+    #
     # if data_majority_undersample is not None:
     #     df = df.drop(
-    #         df.query('AAER == 0').sample(frac=data_majority_undersample, random_state=2290).index)
+    #         df.query('Res_m_per == 0').sample(frac=data_majority_undersample, random_state=2290).index)
     #     df = df.reset_index(drop=True)
-
 
     df = df.reset_index(drop=True)
 
@@ -72,17 +71,17 @@ def setting_creater(df, feature_names, train_period_list,
     df_m_score = df.copy()
     df_f_score = df.copy()
 
-    id_fraud_indenticator = df_y['AAER_ID'].copy()
-    labeled_fraud_indicator = df_y['AAER'].copy()
+    id_fraud_indenticator = df_y['Restatement Key'].copy()
+    labeled_fraud_indicator = df_y['Res_m_per'].copy()
 
     if stakeholder == 'Regulator':
-        y_c_copy_cost = df_y_c['AAER'].copy()
+        y_c_copy_cost = df_y_c['Res_m_per'].copy()
         y_c_copy_cost = np.multiply(df_y_c['Market_cap_all_loss_2016'], y_c_copy_cost) + \
                         np.multiply(- df_y_c['Market_cap_5_per_loss_2016'], 1 - y_c_copy_cost)
-        df_y_c['AAER'] = y_c_copy_cost
+        df_y_c['Res_m_per'] = y_c_copy_cost
 
-    y = df_y['AAER']
-    y_c = df_y_c['AAER']
+    y = df_y['Res_m_per']
+    y_c = df_y_c['Res_m_per']
     m_score = df_m_score['M_score']
     f_score = df_f_score['F_score']
 
@@ -108,7 +107,7 @@ def setting_creater(df, feature_names, train_period_list,
             #     df_train_index = df.loc[train_index]
             #
             #     df_train_index = df_train_index.drop(
-            #         df_train_index.query('AAER == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
+            #         df_train_index.query('Res_m_per == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
             #
             #     train_index = df_train_index.index.tolist()
             #
@@ -129,6 +128,7 @@ def setting_creater(df, feature_names, train_period_list,
 
             train_indexs.append(train_index)
             validation_indexs.append(validation_index)
+
 
             for test_period in test_periods:
                 if test_period[0] is None:
@@ -176,14 +176,13 @@ def setting_creater(df, feature_names, train_period_list,
     return X, y, y_c, m_score, f_score, train_index_list, validation_index_list, \
            test_index_list, name_list, df_experiment_info
 
-
 def get_par_dict(optimisation_metric):
     par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_p_ep_val': 300,
-                            'n_n_found':100},
+                             'n_p_ep_val': 300,
+                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
                           'subsample': [0.05, 0.1],
@@ -196,7 +195,7 @@ def get_par_dict(optimisation_metric):
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [0.25, 1], [None, 1]],
+                         "sample_subsample_undersample": [[0.1, None], [0.25, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -230,8 +229,8 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 
 
 # We impose 2 year gap to mitigate serial fraud issue in test set
-train_period_list = [[[1995, 2000]], [[1996, 2001]], [[1997, 2002]], [[1998, 2003]], [[1999, 2004]], [[2000, 2005]]]
-test_period_list = [[[None, None]], [[2004, 2004]], [[2005, 2005]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
+train_period_list = [[[2000, 2005]], [[2001, 2006]], [[2002, 2007]], [[2003, 2008]], [[2004, 2009]], [[2005, 2010]]]
+test_period_list = [[[None, None]], [[2009, 2009]], [[2010, 2010]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]]]
 validation_list = [True, False, False, False, False, False]
 
 
@@ -247,7 +246,7 @@ if 'experiment_1' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -260,7 +259,7 @@ if 'experiment_1' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_1_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_1_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
@@ -269,7 +268,7 @@ if 'experiment_1' in experiments:
     par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
 
 
-    name = 'AAER_experiment_1_info' + '.csv'
+    name = 'Severe_restatement_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -289,7 +288,7 @@ if 'experiment_2' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -303,7 +302,7 @@ if 'experiment_2' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_2_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_2_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
@@ -312,7 +311,7 @@ if 'experiment_2' in experiments:
     par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
 
 
-    name = 'AAER_experiment_2_info' + '.csv'
+    name = 'Severe_restatement_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -333,7 +332,7 @@ if 'experiment_3' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -347,13 +346,13 @@ if 'experiment_3' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_3_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_3_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
 
-    name = 'AAER_experiment_3_info' + '.csv'
+    name = 'Severe_restatement_experiment_3_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -373,7 +372,7 @@ if 'experiment_4' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -387,13 +386,13 @@ if 'experiment_4' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_4_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_4_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
 
-    name = 'AAER_experiment_4_info' + '.csv'
+    name = 'Severe_restatement_experiment_4_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -413,7 +412,7 @@ if 'experiment_5' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -426,14 +425,14 @@ if 'experiment_5' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_5_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
 
-    name = 'AAER_experiment_5_info' + '.csv'
+    name = 'Severe_restatement_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -452,7 +451,7 @@ if 'experiment_6' in experiments:
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
-        setting_creater(df_aaer,
+        setting_creater(df_severe_restatement,
                         feature_names=feature_names,
                         train_period_list=train_period_list,
                         test_period_list=test_period_list,
@@ -465,14 +464,14 @@ if 'experiment_6' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_6_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severe_restatement_experiment_6_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
     par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
 
-    name = 'AAER_experiment_6_info' + '.csv'
+    name = 'Severe_restatement_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -483,186 +482,3 @@ if 'experiment_6' in experiments:
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if 'experiment_7' in experiments:
-#
-#     #feature_names.append('Log_market_cap_2016')
-#
-#     cost_train = True
-#     cost_validate = False
-#     data_majority_undersample_train = None
-#
-#     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-#     name_list, df_experiment_info = \
-#         setting_creater(df_aaer,
-#                         feature_names=feature_names,
-#                         train_period_list=train_period_list,
-#                         test_period_list=test_period_list,
-#                         stakeholder=stakeholder, validation_list=validation_list)
-#
-#     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
-#
-#     cross_val_perf_ind = 'ap'
-#     optimisation_metric = 'basic'
-#
-#
-#     for i_1 in range(len(name_list)):
-#         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'AAER_experiment_7_' + name_list[i_1][i_2]
-#
-#     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-#
-#     par_dict["Lgbm"]["n_ratio"] = [1]
-#
-#     name = 'AAER_experiment_7_info' + '.csv'
-#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-#
-#     performance_check(methods=methods,
-#                       par_dict_init=par_dict,
-#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-#                       name_list=name_list, train_list=train_index_list,
-#                       validate_list=validation_index_list, test_list=test_index_list,
-#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-#                       cost_train=cost_train,
-#                       cost_validate=cost_validate, keep_first=True)
-#
-#
-# if 'experiment_8' in experiments:
-#
-#     #feature_names.append('Log_market_cap_2016')
-#
-#     cost_train = False
-#     cost_validate = False
-#
-#     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-#     name_list, df_experiment_info = \
-#         setting_creater(df_aaer,
-#                         feature_names=feature_names,
-#                         train_period_list=train_period_list,
-#                         test_period_list=test_period_list,
-#                         stakeholder=stakeholder, validation_list=validation_list)
-#
-#     methods = ['Logit']
-#
-#     cross_val_perf_ind = 'ap'
-#     optimisation_metric = 'basic'
-#
-#
-#     for i_1 in range(len(name_list)):
-#         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'AAER_experiment_8_' + name_list[i_1][i_2]
-#
-#     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-#
-#     par_dict["Logit"]["n_ratio"] = [1]
-#
-#     name = 'AAER_experiment_8_info' + '.csv'
-#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-#
-#     performance_check(methods=methods,
-#                       par_dict_init=par_dict,
-#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-#                       name_list=name_list, train_list=train_index_list,
-#                       validate_list=validation_index_list, test_list=test_index_list,
-#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-#                       cost_train=cost_train,
-#                       cost_validate=cost_validate, keep_first=True)
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if 'experiment_5' in experiments:
-#
-#     methods = ['Logit', 'Lgbm']
-#
-#
-#     cross_val_perf_ind = 'precision'
-#     optimisation_metric = 'precision'
-#
-#     for i_1 in range(len(name_list)):
-#         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'AAER_experiment_5_' + name_list[i_1][i_2]
-#
-#     par_dict = get_par_dict(n_ratio=n_ratio, n_p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep=n_p_ep, n_n_found = n_n_found,
-#                             optimisation_metric=[optimisation_metric])
-#
-#     par_dict["Logit"]["n_ratio"] = [1]
-#     par_dict["Logit"]["p_prec"] = [0.05, 0.1, 0.3]
-#
-#     par_dict["Lgbm"]["n_ratio"] = [1]
-#     par_dict["Lgbm"]["p_prec"] = [0.05, 0.1, 0.3]
-#
-#
-#     name = 'AAER_experiment_5_info' + '.csv'
-#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-#
-#     performance_check(methods=methods,
-#                       par_dict_init=par_dict,
-#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-#                       name_list=name_list, train_list=train_index_list,
-#                       validate_list=validation_index_list, test_list=test_index_list,
-#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-#                       cost_train=cost_train,
-#                       cost_validate=cost_validate, keep_first=True)

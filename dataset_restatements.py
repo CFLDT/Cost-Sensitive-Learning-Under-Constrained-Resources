@@ -265,7 +265,7 @@ if 'experiment_1' in experiments:
 
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
 
 
     name = 'Restatement_experiment_1_info' + '.csv'
@@ -308,7 +308,7 @@ if 'experiment_2' in experiments:
 
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
+    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
 
 
     name = 'Restatement_experiment_2_info' + '.csv'
@@ -430,7 +430,7 @@ if 'experiment_5' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 0.3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
 
     name = 'Restatement_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -469,7 +469,7 @@ if 'experiment_6' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.1, 0.3, 0.5]
+    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
 
     name = 'Restatement_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -483,87 +483,3 @@ if 'experiment_6' in experiments:
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if 'experiment_5' in experiments:
-#
-#     methods = ['Logit', 'Lgbm']
-#
-#
-#     cross_val_perf_ind = 'precision'
-#     optimisation_metric = 'precision'
-#
-#     for i_1 in range(len(name_list)):
-#         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'Restatement_experiment_5_' + name_list[i_1][i_2]
-#
-#     par_dict = get_par_dict(n_ratio=n_ratio, n_p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep=n_p_ep, n_n_found = n_n_found,
-#                             optimisation_metric=[optimisation_metric])
-#
-#     par_dict["Logit"]["n_ratio"] = [1]
-#     par_dict["Logit"]["p_prec"] = [0.1, 0.3, 0.5]
-#
-#     par_dict["Lgbm"]["n_ratio"] = [1]
-#     par_dict["Lgbm"]["p_prec"] = [0.1, 0.3, 0.5]
-#
-#
-#     name = 'Restatement_experiment_5_info' + '.csv'
-#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-#
-#     performance_check(methods=methods,
-#                       par_dict_init=par_dict,
-#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-#                       name_list=name_list, train_list=train_index_list,
-#                       validate_list=validation_index_list, test_list=test_index_list,
-#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-#                       cost_train=cost_train,
-#                       cost_validate=cost_validate, keep_first=True)

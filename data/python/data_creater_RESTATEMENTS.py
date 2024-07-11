@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from data.python.data_creater_FUNCTIONS import company_codes_merger_cik
+from data.python.data_creater_FUNCTIONS import company_codes_merger_cik,company_codes_merger_cik_2
 
 base_path = Path(__file__).parent
 
@@ -44,8 +44,7 @@ df_restatements.loc[((df_restatements['Restatement_end_year_year'] >= df_restate
 df_restatements.loc[((df_restatements['Restatement_end_year_year'] < df_restatements['Year']) |
                      (df_restatements['Restatement_begin_year_year'] > df_restatements[
                          'Year'])), 'Restatement_period'] = 0
-df_restatements.loc[(df_restatements['Restatement_begin_year_year'] == df_restatements['Year']), 'Restatement_first'] = 1
-df_restatements.loc[(df_restatements['Restatement_begin_year_year'] != df_restatements['Year']), 'Restatement_first'] = 0
+
 
 
 df_restatements.loc[((df_restatements['Restatement_end_year_year'] >= df_restatements['Year']) &
@@ -56,18 +55,12 @@ df_restatements.loc[((df_restatements['Restatement_end_year_year'] < df_restatem
                      (df_restatements['Restatement_begin_year_year'] > df_restatements[
                          'Year']) | (
                              df_restatements['Year_8K_402'].notnull() == False)), 'Restatement_material_period'] = 0
-df_restatements.loc[((df_restatements['Restatement_begin_year_year'] == df_restatements['Year']) & (
-                             df_restatements['Year_8K_402'].notnull() == True)), 'Restatement_material_first'] = 1
-df_restatements.loc[((df_restatements['Restatement_begin_year_year'] != df_restatements['Year']) | (
-                             df_restatements['Year_8K_402'].notnull() == False)), 'Restatement_material_first'] = 0
+
 
 df_restatements['Restatement_material_period'] = np.where(
     pd.to_datetime(df_restatements["Disclosure Date"], infer_datetime_format=True) < "2004-08-01", np.nan,
     np.array(df_restatements['Restatement_material_period']))
 
-df_restatements['Restatement_material_first'] = np.where(
-    pd.to_datetime(df_restatements["Disclosure Date"], infer_datetime_format=True) < "2004-08-01", np.nan,
-    np.array(df_restatements['Restatement_material_first']))
 
 
 df_restatements['CIK'] = df_restatements['CIK'].astype('Int64')
@@ -77,12 +70,14 @@ df_restatements = df_restatements.loc[df_restatements['Year'].notna(), :]
 
 df_restatements = df_restatements.rename(columns={"Restatement_period": 'Res_per',
                                                   "Restatement_material_period": "Res_m_per",
-                                                  "Restatement_first": 'Res_first',
-                                                  "Restatement_material_first": "Res_m_first"
+                                                  "Restated Period Begin": "Begin_date",
+                                                  "Restated Period Ended": "End_date"
                                                   })
 
+
 df_restatements = df_restatements.sort_values(by=['CIK', 'Year']).reset_index(drop=True)
-df_restatements = df_restatements[['Year', 'CIK', 'Res_per', 'Res_m_per','Res_first','Res_m_first', 'Restatement Key']]
+df_restatements = df_restatements[['Year', 'CIK', 'Res_per', 'Res_m_per', 'Restatement Key',
+                                   'Begin_date', 'End_date']]
 
 df_restatements = df_restatements.dropna(subset = ['Restatement Key', 'Year', 'CIK'])
 df_restatements = df_restatements.sort_values(by=['CIK', 'Restatement Key']).reset_index(drop=True)
@@ -90,42 +85,50 @@ df_restatements = df_restatements.sort_values(by=['CIK', 'Restatement Key']).res
 #If multiple restatements affect the same firm in the same year, we keep the one with lowest restatement Key
 df_restatements = df_restatements.drop_duplicates(subset=['CIK', 'Restatement Key', 'Year'], keep='first')
 
+# keep the duplicate row with fewest nan values
+df_restatements = df_restatements.assign(counts=df_restatements.count(axis=1)).sort_values(['counts']). \
+    drop_duplicates(['Year', 'CIK'], keep='last').drop('counts', axis=1)
+df_restatements = df_restatements.sort_values(by=['CIK', 'Year']).reset_index(drop=True)
 
-# Merge with compustat data
+# Merge with compustat data & ensure that the information already affects the year of interest
 
-df = company_codes_merger_cik(df_restatements)
+df = company_codes_merger_cik_2(df_restatements)
+
+df['Res_per'] = np.where(
+    pd.to_datetime(df["Begin_date"], infer_datetime_format=True) > \
+    pd.to_datetime(df["datadate"], infer_datetime_format=True), 0,
+    np.array(df['Res_per']))
+
+df['Res_m_per'] = np.where(
+    pd.to_datetime(df["Begin_date"], infer_datetime_format=True) > \
+    pd.to_datetime(df["datadate"], infer_datetime_format=True), 0,
+    np.array(df['Res_m_per']))
+
+df = df[['Year', 'CIK', 'Res_per', 'Res_m_per', 'Restatement Key']]
+df = company_codes_merger_cik(df)
 
 
 print('The number of Restatements merged using CIK: ' + str(df[df['Res_per'] == 1].shape[0]))
-print('The number of first Restatement merged using CIK: ' + str(df[df['Res_first'] == 1].shape[0]))
 print('The number of severe Restatements merged using CIK: ' + str(df[df['Res_m_per'] == 1].shape[0]))
-print('The number of first severe Restatement merged using CIK: ' + str(df[df['Res_m_first'] == 1].shape[0]))
 
 
 counter_df = df.copy()
 counter_df['counter'] = 1
-grouped = counter_df[['Year', 'counter', 'Res_per', 'Res_first', 'Res_m_per', 'Res_m_first']].groupby('Year').sum()
-grouped = grouped.rename(columns={"Res_per": "Number of Restatements", "counter": "Number of Firms",
-                                  "Res_first": "Number of Restatements First", "Res_m_per": "Number of Severe Restatements",
-                                  "Res_m_first": "Number of Severe Restatements First"})
+grouped = counter_df[['Year', 'counter', 'Res_per', 'Res_m_per']].groupby('Year').sum()
+grouped = grouped.rename(columns={"Res_per": "Number of Restatements", 'Res_m_per': 'Number of Severe Restatements',
+                                  "counter": "Number of Firms"})
 grouped['Percentage Restatements'] = grouped['Number of Restatements'] / grouped['Number of Firms'] * 100
-grouped['Percentage Restatements First'] = grouped['Number of Restatements First'] / grouped['Number of Firms'] * 100
 grouped['Percentage Severe Restatements'] = grouped['Number of Severe Restatements'] / grouped['Number of Firms'] * 100
-grouped['Percentage Severe Restatements First'] = grouped['Number of Severe Restatements First'] / grouped['Number of Firms'] * 100
 
 grouped = grouped.reset_index(level=0)
-grouped[["Number of Restatements", "Number of Firms", "Number of Restatements First",
-         "Number of Severe Restatements", "Number of Severe Restatements First"]] = \
-    grouped[["Number of Restatements", "Number of Firms", "Number of Restatements First",
-         "Number of Severe Restatements", "Number of Severe Restatements First"]].applymap('{:,.0f}'.format)
+grouped[["Number of Restatements", "Number of Firms",
+         "Number of Severe Restatements"]] = \
+    grouped[["Number of Restatements", "Number of Firms",
+         "Number of Severe Restatements"]].applymap('{:,.0f}'.format)
 grouped[['Percentage Restatements']] = \
     grouped[['Percentage Restatements']].applymap('{:,.2f}'.format)
-grouped[['Percentage Restatements First']] = \
-    grouped[['Percentage Restatements First']].applymap('{:,.2f}'.format)
 grouped[['Percentage Severe Restatements']] = \
     grouped[['Percentage Severe Restatements']].applymap('{:,.2f}'.format)
-grouped[['Percentage Severe Restatements First']] = \
-    grouped[['Percentage Severe Restatements First']].applymap('{:,.2f}'.format)
 print(grouped.to_latex(index=False))
 
 

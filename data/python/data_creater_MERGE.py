@@ -51,25 +51,20 @@ counter_df['counter'] = 1
 grouped = counter_df[['Year', 'counter', 'AAER', 'Res_per', 'Res_m_per']].groupby('Year').sum()
 grouped = grouped.rename(columns={"AAER": "Number of AAERs", "counter": "Number of Firms", "Res_per": "Number of Restatements",
                                     "Res_m_per": "Number of Severe Restatements"})
-grouped['Percentage AAERs'] = grouped['Number of AAERs'] / grouped['Number of Firms'] * 100
-grouped['Percentage Restatements'] = grouped['Number of Restatements'] / grouped['Number of Firms'] * 100
-grouped['Percentage Severe Restatements'] = grouped['Number of Severe Restatements'] / grouped['Number of Firms'] * 100
+# grouped['Percentage AAERs'] = grouped['Number of AAERs'] / grouped['Number of Firms'] * 100
+# grouped['Percentage Restatements'] = grouped['Number of Restatements'] / grouped['Number of Firms'] * 100
+# grouped['Percentage Severe Restatements'] = grouped['Number of Severe Restatements'] / grouped['Number of Firms'] * 100
 
 grouped = grouped.reset_index(level=0)
 grouped[['Number of AAERs', 'Number of Firms', 'Number of Restatements', 'Number of Severe Restatements']] = \
     grouped[['Number of AAERs', 'Number of Firms', 'Number of Restatements', 'Number of Severe Restatements']].applymap('{:,.0f}'.format)
-grouped[['Percentage AAERs']] = \
-    grouped[['Percentage AAERs']].applymap('{:,.2f}'.format)
-grouped[['Percentage Restatements']] = \
-    grouped[['Percentage Restatements']].applymap('{:,.2f}'.format)
-grouped[['Percentage Severe Restatements']] = \
-    grouped[['Percentage Severe Restatements']].applymap('{:,.2f}'.format)
+# grouped[['Percentage AAERs']] = \
+#     grouped[['Percentage AAERs']].applymap('{:,.2f}'.format)
+# grouped[['Percentage Restatements']] = \
+#     grouped[['Percentage Restatements']].applymap('{:,.2f}'.format)
+# grouped[['Percentage Severe Restatements']] = \
+#     grouped[['Percentage Severe Restatements']].applymap('{:,.2f}'.format)
 print(grouped.to_latex(index=False))
-
-for i in range(min_year, max_year+1):
-    df_merged = df_merged.drop(
-        df_merged.query('Year == '+str(i)).query('AAER == 0').sample(frac=0.8, random_state=2290).index)
-    df_merged = df_merged.reset_index(drop=True)
 
 
 counter_df = df_merged.copy()
@@ -77,21 +72,25 @@ counter_df['counter'] = 1
 grouped = counter_df[['Year', 'counter', 'AAER', 'Res_per', 'Res_m_per']].groupby('Year').sum()
 grouped = grouped.rename(columns={"AAER": "Number of AAERs", "counter": "Number of Firms", "Res_per": "Number of Restatements",
                                     "Res_m_per": "Number of Severe Restatements"})
-grouped['Percentage AAERs'] = grouped['Number of AAERs'] / grouped['Number of Firms'] * 100
-grouped['Percentage Restatements'] = grouped['Number of Restatements'] / grouped['Number of Firms'] * 100
-grouped['Percentage Severe Restatements'] = grouped['Number of Severe Restatements'] / grouped['Number of Firms'] * 100
+#grouped['Percentage AAERs'] = grouped['Number of AAERs'] / grouped['Number of Firms'] * 100
+#grouped['Percentage Restatements'] = grouped['Number of Restatements'] / grouped['Number of Firms'] * 100
+#grouped['Percentage Severe Restatements'] = grouped['Number of Severe Restatements'] / grouped['Number of Firms'] * 100
 
 grouped = grouped.reset_index(level=0)
 grouped[['Number of AAERs', 'Number of Firms', 'Number of Restatements', 'Number of Severe Restatements']] = \
     grouped[['Number of AAERs', 'Number of Firms', 'Number of Restatements', 'Number of Severe Restatements']].applymap('{:,.0f}'.format)
-grouped[['Percentage AAERs']] = \
-    grouped[['Percentage AAERs']].applymap('{:,.2f}'.format)
-grouped[['Percentage Restatements']] = \
-    grouped[['Percentage Restatements']].applymap('{:,.2f}'.format)
-grouped[['Percentage Severe Restatements']] = \
-    grouped[['Percentage Severe Restatements']].applymap('{:,.2f}'.format)
+# grouped[['Percentage AAERs']] = \
+#     grouped[['Percentage AAERs']].applymap('{:,.2f}'.format)
+# grouped[['Percentage Restatements']] = \
+#     grouped[['Percentage Restatements']].applymap('{:,.2f}'.format)
+# grouped[['Percentage Severe Restatements']] = \
+#     grouped[['Percentage Severe Restatements']].applymap('{:,.2f}'.format)
 print(grouped.to_latex(index=False))
 
+path = (base_path / "../csv/All_data_1.csv").resolve()
+df_merged.iloc[:100000,:].to_csv(path, index=True)
 
-path = (base_path / "../csv/All_data.csv").resolve()
-df_merged.to_csv(path, index=True)
+path = (base_path / "../csv/All_data_2.csv").resolve()
+df_merged.iloc[100000:,:].to_csv(path, index=True)
+
+
