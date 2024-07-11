@@ -185,17 +185,17 @@ def get_par_dict(optimisation_metric):
                              'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
-                          'subsample': [0.05, 0.1],
+                          'subsample_undersample': [[0.1, None], [0.2, 1]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0], # [0, 10],
+                         "n_estimators": [50],  # [50, 100],
+                         "lambd": [10], # [0, 10],
                          "alpha": [0],
-                         "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
+                         "learning_rate": [0.1, 0.01],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [0.25, 1]],
+                         "sample_subsample_undersample": [[0.1, None], [0.2, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'

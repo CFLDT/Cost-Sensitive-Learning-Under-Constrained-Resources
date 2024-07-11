@@ -9,9 +9,10 @@ import math
 
 class Logit(Lgt):
 
-    def __init__(self, lambd, sigma, indic_approx, subsample, theta=None):
+    def __init__(self, lambd, sigma, indic_approx, subsample, undersample, theta=None):
 
         self.subsample = subsample
+        self.undersample = undersample
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
@@ -22,12 +23,28 @@ class Logit(Lgt):
 
         starttimer = timer()
 
-        if self.subsample is not None:
-            all_ind = np.arange(len(y_clas))
-            ind_0 = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
-            X = X[ind_0,:]
-            y = y[ind_0]
+        indices_0 = np.where(y_clas == 0)[0]
+        indices_1 = np.where(y_clas == 1)[0]
+        all_ind = np.arange(len(y_clas))
 
+        if ((self.undersample is not None) and (self.subsample is None)):
+            ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+                                     replace=False)
+            ind_tr = list(np.append(indices_1, ind_0))
+            X = X[ind_tr,:]
+            y = y[ind_tr]
+        if ((self.undersample is None) and (self.subsample is not None)):
+            ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
+            ind_tr = list(ind)
+            X = X[ind_tr,:]
+            y = y[ind_tr]
+        if ((self.undersample is not None) and (self.subsample is not None)):
+            ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+                                     replace=False)
+            ind_a = list(np.append(indices_1, ind_0))
+            ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
+            X = X[ind_tr,:]
+            y = y[ind_tr]
 
         self.n = int(n_ratio * len(y))
         div = 1 / X.shape[0]
@@ -87,7 +104,7 @@ class Logit(Lgt):
         if metric == 'ep':
 
             self.p_ep = p_ep
-            self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
+            #self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
             self.n_ep = max(1/(p_ep), 1/(1 - p_ep))
 
             discounter = np.zeros(len(y))

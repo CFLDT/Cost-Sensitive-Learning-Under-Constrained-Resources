@@ -389,7 +389,7 @@ class Lgt:
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
         # obj = -PerformanceMetricsTrain.performance_metrics_ep(y_pred, y_true)
 
-        #print('Optimisation Objective: ' + str(obj))
+        print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 

@@ -14,7 +14,9 @@ class MethodLearner:
         metric = par_dict_logit.get("metric")
         sigma = par_dict_logit.get("sigma")
         indic_approx = par_dict_logit.get("indic_approx")
-        subsample = par_dict_logit.get("subsample")
+        sample = par_dict_logit.get("subsample_undersample")
+        subsample = sample[0]
+        undersample = sample[1]
 
         n_ratio = par_dict_logit.get("n_ratio")
         p_rbp = par_dict_logit.get("p_rbp")
@@ -30,7 +32,7 @@ class MethodLearner:
             #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1])
 
 
-        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, subsample=subsample)
+        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, subsample = subsample, undersample=undersample)
         logist.fitting(X_train, y_train, y_train_clas, init_theta, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
 
         return logist

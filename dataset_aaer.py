@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_6'
+experiments = 'experiment_3'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -183,20 +183,20 @@ def get_par_dict(optimisation_metric):
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
                             'n_p_ep_val': 100,
-                            'n_n_found':100},
+                            'n_n_found': 100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
-                          'subsample': [0.05, 0.1],
+                          'subsample_undersample': [[0.1, None], [None, 1]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0], # [0, 10],
+                         "lambd": [0, 10], # [0, 10],
                          "alpha": [0],
-                         "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
+                         "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [0.5, 0.5], [None, 1]],
+                         "sample_subsample_undersample": [[0.1, None], [None, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -339,7 +339,7 @@ if 'experiment_3' in experiments:
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
 
-    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+    methods = ['Lgbm']
 
     cross_val_perf_ind = 'ap'
     optimisation_metric = 'basic'

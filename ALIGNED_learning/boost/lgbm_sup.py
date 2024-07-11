@@ -146,7 +146,7 @@ class Lgbm(Lightgbm):
                 lengh = len(ind_tr)
 
             self.p_ep = p_ep
-            self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
+            #self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
             self.n_ep = max(1/(p_ep), 1/(1 - p_ep))
 
             disc = 0

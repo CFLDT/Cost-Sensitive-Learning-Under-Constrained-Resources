@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_4'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_severe_restatement_1 = pd.read_csv(path, index_col=0)
@@ -185,17 +185,17 @@ def get_par_dict(optimisation_metric):
                              'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
-                          'subsample': [0.05, 0.1],
+                          'subsample_undersample': [[0.1, None], [0.2, 1]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0], # [0, 10],
+                         "lambd": [0, 10], # [0, 10],
                          "alpha": [0],
-                         "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
+                         "learning_rate": [0.1, 0.01],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [0.25, 1]],
+                         "sample_subsample_undersample": [[0.1, None], [0.2, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -229,10 +229,14 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 
 
 # We impose 2 year gap to mitigate serial fraud issue in test set
+# train_period_list = [[[2004, 2009]], [[2005, 2010]], [[2006, 2011]], [[2007, 2012]], [[2008, 2013]], [[2009, 2014]]]
+# test_period_list = [[[None, None]], [[2013, 2013]], [[2014, 2014]], [[2015, 2015]], [[2016, 2016]], [[2017, 2017]]]
+# validation_list = [True, False, False, False, False, False]
+
+
 train_period_list = [[[2000, 2005]], [[2001, 2006]], [[2002, 2007]], [[2003, 2008]], [[2004, 2009]], [[2005, 2010]]]
 test_period_list = [[[None, None]], [[2009, 2009]], [[2010, 2010]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]]]
 validation_list = [True, False, False, False, False, False]
-
 
 feature_importance = False
 stakeholder = 'Regulator'
