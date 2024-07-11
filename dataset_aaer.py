@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_5'
+experiments = 'experiment_6'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -182,7 +182,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_p_ep_val': 300,
+                            'n_p_ep_val': 100,
                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
@@ -196,7 +196,7 @@ def get_par_dict(optimisation_metric):
                          "alpha": [0],
                          "learning_rate": [0.01, 0.001],  # [0.01, 0.001],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [0.25, 1], [None, 1]],
+                         "sample_subsample_undersample": [[0.1, None], [0.5, 0.5], [None, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -266,7 +266,7 @@ if 'experiment_1' in experiments:
 
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
 
 
     name = 'AAER_experiment_1_info' + '.csv'
@@ -309,7 +309,7 @@ if 'experiment_2' in experiments:
 
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
 
 
     name = 'AAER_experiment_2_info' + '.csv'
@@ -470,7 +470,7 @@ if 'experiment_6' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
 
     name = 'AAER_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())

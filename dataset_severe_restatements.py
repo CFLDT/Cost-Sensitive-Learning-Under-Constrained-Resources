@@ -181,7 +181,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                             'n_p_ep_val': 300,
+                             'n_p_ep_val': 100,
                              'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1],
                           'sigma': [1],
@@ -265,7 +265,7 @@ if 'experiment_1' in experiments:
 
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
 
 
     name = 'Severe_restatement_experiment_1_info' + '.csv'
@@ -308,7 +308,7 @@ if 'experiment_2' in experiments:
 
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
 
 
     name = 'Severe_restatement_experiment_2_info' + '.csv'
@@ -430,7 +430,7 @@ if 'experiment_5' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
 
     name = 'Severe_restatement_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -469,7 +469,7 @@ if 'experiment_6' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.05, 0.1, 0.3]
+    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
 
     name = 'Severe_restatement_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
