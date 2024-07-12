@@ -97,7 +97,7 @@ def setting_creater(df, feature_names, train_period_list,
             train_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]))
 
             if validations == True:
-                val_bool = ((df['Year'] >= train_period[1]+3) & (df['Year'] <= train_period[1] + 3))
+                val_bool = ((df['Year'] >= train_period[1]+1) & (df['Year'] <= train_period[1] + 1))
             else:
                 val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
 
@@ -181,19 +181,19 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                             'n_p_ep_val': 100,
+                             'p_ep_val': 1/3,
                              'n_n_found':100},
-                'Logit': {'lambd': [0, 0.1],
+                'Logit': {'lambd': [0, 0.1, 1],
                           'sigma': [1],
-                          'subsample_undersample': [[0.1, None], [0.2, 1]],
+                          'subsample_undersample': [[None, None]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50],  # [50, 100],
-                         "lambd": [10], # [0, 10],
+                         "n_estimators": [50, 100],  # [50, 100],
+                         "lambd": [0, 10], # [0, 10],
                          "alpha": [0],
-                         "learning_rate": [0.1, 0.01],  # [0.01, 0.001],
+                         "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
                          "sample_subsample_undersample": [[0.1, None], [0.2, 1]],
                          "subsample_freq": [1],
@@ -228,10 +228,11 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 
 
 
-# We impose 2 year gap to mitigate serial fraud issue in test set
-train_period_list = [[[2000, 2005]], [[2001, 2006]], [[2002, 2007]], [[2003, 2008]], [[2004, 2009]], [[2005, 2010]]]
-test_period_list = [[[None, None]], [[2009, 2009]], [[2010, 2010]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]]]
-validation_list = [True, False, False, False, False, False]
+train_period_list = [[[2000, 2004]], [[2001, 2005]], [[2002, 2006]], [[2003, 2007]], [[2004, 2008]], [[2005, 2009]],
+                                     [[2006, 2010]], [[2007, 2011]]]
+test_period_list = [[[None, None]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]], [[2009, 2009]], [[2010, 2010]],
+                                    [[2011, 2011]], [[2012, 2012]]]
+validation_list = [True, False, False, False, False, False, False, False]
 
 
 feature_importance = False

@@ -194,6 +194,14 @@ class Lgbm(Lightgbm):
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.precision)
 
+        # if metric == 'uplift':
+        #
+        #     model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
+        #                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+        #                               reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+        #                            min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+        #                            verbose=-1, objective=self.uplift)
+
 
         # Disable
         def blockPrint():

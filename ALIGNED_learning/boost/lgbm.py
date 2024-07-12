@@ -465,6 +465,9 @@ class Lightgbm:
 
         delta_ij[bool_true] = np.abs(diff_output_1[bool_true] - diff_output_2[bool_true])
 
+        # delta_ij[bool_true] = np.abs(self.discounter[np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) -1]
+        #                              - self.discounter[np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])])
+
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2 = self.lambda_calc(bool_true,
@@ -617,3 +620,66 @@ class Lightgbm:
         print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
+
+    #
+    #
+    # def uplift(self, y_true, y_pred):
+    #
+    #     if ((self.undersample is not None) or (self.subsample is not None)):
+    #         grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+    #         hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+    #
+    #         y_true = y_true.flat[self.indices_list[self.it_index]]
+    #         y_pred = y_pred.flat[self.indices_list[self.it_index]]
+    #
+    #     # Variables
+    #
+    #     diff_ij, G_ij, H_ij, P_ij, P_ji, constant_ij, delta_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2, ranks_v_stack_trans, \
+    #     ranks_v_stack, y_true_v_stack_trans, y_true_v_stack, y_pred_v_stack_trans, \
+    #     y_pred_v_stack, bool_true = self.variables_init(y_true, y_pred)
+    #
+    #     # Base Value
+    #
+    #     uplift_max = PerformanceMetrics.performance_metrics_uplift(y_true, y_true, maximum=True)
+    #
+    #     # Lambda_ij calculation
+    #
+    #     diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
+    #     G_ij[bool_true] = (2 ** (y_true_v_stack_trans[bool_true]) - 2 ** (y_true_v_stack[bool_true])) / (uplift_max)
+    #
+    #     n = len(y_true)
+    #     def f(x):
+    #         y = np.cumsum(1/i for  for i in range(len(x)))
+    #         return y
+    #
+    #     delta_ij[bool_true] = np.abs(f(np.abs(ranks_v_stack_trans[bool_true] -
+    #                                                       ranks_v_stack[bool_true]) + 1) - \
+    #                                  (f(np.abs(ranks_v_stack_trans[bool_true] -
+    #                                                       ranks_v_stack[bool_true]) + 1 + 1)))
+    #
+    #     H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
+    #
+    #     P_ji, P_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2 = self.lambda_calc(bool_true,
+    #                                                                                     constant_ij, H_ij, diff_ij,
+    #                                                                                     P_ji, P_ij, lamb_ij, lamb_ij_2,
+    #                                                                                     lambd_der_ij, lambd_der_ij_2)
+    #
+    #     # Grad_Hess
+    #
+    #     grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
+    #
+    #     if ((self.undersample is not None) or (self.subsample is not None)):
+    #         grad_1.flat[self.indices_list[self.it_index]] = grad
+    #         hess_1.flat[self.indices_list[self.it_index]] = hess
+    #
+    #         grad = grad_1
+    #         hess = hess_1
+    #         self.it_index = self.it_index + 1
+    #
+    #     # Performance metrics
+    #
+    #     # PerformanceMetrics.performance_metrics_dcg(y_pred, y_true)
+    #     print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+    #
+    #     return grad, hess
+

@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_3'
+experiments = 'experiment_1'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -98,7 +98,7 @@ def setting_creater(df, feature_names, train_period_list,
             train_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]))
 
             if validations == True:
-                val_bool = ((df['Year'] >= train_period[1]+3) & (df['Year'] <= train_period[1] + 3))
+                val_bool = ((df['Year'] >= train_period[1]+1) & (df['Year'] <= train_period[1] + 1))
             else:
                 val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
 
@@ -182,11 +182,11 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_p_ep_val': 100,
+                            'p_ep_val': 1/3,
                             'n_n_found': 100},
-                'Logit': {'lambd': [0, 0.1],
+                'Logit': {'lambd': [0, 0.1, 1],
                           'sigma': [1],
-                          'subsample_undersample': [[0.1, None], [None, 1]],
+                          'subsample_undersample': [[None, None]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
@@ -229,10 +229,11 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 
 
 
-# We impose 2 year gap to mitigate serial fraud issue in test set
-train_period_list = [[[1995, 2000]], [[1996, 2001]], [[1997, 2002]], [[1998, 2003]], [[1999, 2004]], [[2000, 2005]]]
-test_period_list = [[[None, None]], [[2004, 2004]], [[2005, 2005]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
-validation_list = [True, False, False, False, False, False]
+train_period_list = [[[1996, 2000]], [[1997, 2001]], [[1998, 2002]], [[1999, 2003]], [[2000, 2004]],
+                                     [[2001, 2005]], [[2002, 2006]], [[2003, 2007]]]
+test_period_list = [[[None, None]], [[2002, 2002]], [[2003, 2003]], [[2004, 2004]], [[2005, 2005]],
+                                     [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
+validation_list = [True, False, False, False, False, False, False,  False]
 
 
 feature_importance = False
@@ -339,7 +340,7 @@ if 'experiment_3' in experiments:
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
 
-    methods = ['Lgbm']
+    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
     cross_val_perf_ind = 'ap'
     optimisation_metric = 'basic'
@@ -500,48 +501,48 @@ if 'experiment_6' in experiments:
 
 
 
-# if 'experiment_7' in experiments:
-#
-#     #feature_names.append('Log_market_cap_2016')
-#
-#     cost_train = True
-#     cost_validate = False
-#     data_majority_undersample_train = None
-#
-#     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-#     name_list, df_experiment_info = \
-#         setting_creater(df_aaer,
-#                         feature_names=feature_names,
-#                         train_period_list=train_period_list,
-#                         test_period_list=test_period_list,
-#                         stakeholder=stakeholder, validation_list=validation_list)
-#
-#     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
-#
-#     cross_val_perf_ind = 'ap'
-#     optimisation_metric = 'basic'
-#
-#
-#     for i_1 in range(len(name_list)):
-#         for i_2 in range(len(name_list[i_1])):
-#             name_list[i_1][i_2] = 'AAER_experiment_7_' + name_list[i_1][i_2]
-#
-#     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-#
-#     par_dict["Lgbm"]["n_ratio"] = [1]
-#
-#     name = 'AAER_experiment_7_info' + '.csv'
-#     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-#
-#     performance_check(methods=methods,
-#                       par_dict_init=par_dict,
-#                       X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-#                       name_list=name_list, train_list=train_index_list,
-#                       validate_list=validation_index_list, test_list=test_index_list,
-#                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-#                       cost_train=cost_train,
-#                       cost_validate=cost_validate, keep_first=True)
-#
+if 'experiment_7' in experiments:
+
+    #feature_names.append('Log_market_cap_2016')
+
+    cost_train = True
+    cost_validate = False
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_aaer,
+                        feature_names=feature_names,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+
+    cross_val_perf_ind = 'ap'
+    optimisation_metric = 'basic'
+
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'AAER_experiment_7_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+
+    name = 'AAER_experiment_7_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate, keep_first=True)
+
 #
 # if 'experiment_8' in experiments:
 #

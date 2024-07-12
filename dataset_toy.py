@@ -35,9 +35,9 @@ y_n = np.zeros(n_n)
 y_fc = np.ones(n_fc)
 y_fe = np.ones(n_fe)
 
-y_n = np.random.choice([0, 1], size=(n_n,), p=[0.7, 0.3])
+#y_n = np.random.choice([0, 1], size=(n_n,), p=[0.7, 0.3])
 y_fc = np.random.choice([0, 1], size=(n_fc,), p=[0.5, 0.5])
-y_fe = np.random.choice([0, 1], size=(n_fe,), p=[0.5, 0.5])
+# y_fe = np.random.choice([0, 1], size=(n_fe,), p=[0.5, 0.5])
 
 
 x_n = np.concatenate((x_n_1, x_n_2), axis=1)
@@ -80,11 +80,17 @@ X_train, X_val, _ = scaler(
 
 task_dict = {'name': 'Toy_Data_1'}
 
-opt_par_dict = {'Logit': {'lambd': 0,
-                          'sigma': 0.1,
+opt_par_dict = {'General_val_test': {'n_ratio': 1,
+                            'n_p_prec': 26,
+                            'p_rbp': 0.9,
+                            'n_p_ep': 26,
+                            'p_ep_val': 0.1,
+                            'n_n_found': 26},
+                'Logit': {'lambd': 0,
+                          'sigma': 1,
                           'subsample_undersample': [None, None],
                           'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
-                          'metric': 'ep'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
+                          'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": 5,
                          "n_estimators": 50,
@@ -97,7 +103,7 @@ opt_par_dict = {'Logit': {'lambd': 0,
                          "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'
                          "sigma": 1,                   # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": 'lambdaloss',   #'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
-                         "metric": 'ep'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision
+                         "metric": 'ep'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision, uplift
 
 opt_par_dict["Logit"]["n_ratio"] = 1
 opt_par_dict["Logit"]["p_prec"] = 0.05
@@ -105,8 +111,8 @@ opt_par_dict["Logit"]["p_rbp"] = 0.8
 opt_par_dict["Logit"]["p_ep"] = 0.5
 opt_par_dict["Logit"]["n_c_ep"] = max(1/(0.5), 1/(1 - 0.5)) #math.ceil(1 / (0.5 * (1 - 0.5)))
 
-# opt_par_dict["Logit"]["p_ep"] = 0.005
-# opt_par_dict["Logit"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0.005 * (1 - 0.005)))
+opt_par_dict["Logit"]["p_ep"] = 0.1
+opt_par_dict["Logit"]["n_c_ep"] = max(1/(0.1), 1/(1 - 0.1)) #math.ceil(1 / (0.005 * (1 - 0.005)))
 
 opt_par_dict["Lgbm"]["n_ratio"] = 1
 opt_par_dict["Lgbm"]["p_prec"] = 0.1
@@ -115,11 +121,11 @@ opt_par_dict["Lgbm"]["p_ep"] = 0.005
 opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0.005 * (1 - 0.005)))
 
 
-# opt_par_dict["Lgbm"]["p_ep"] = 2/3
-# opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3)) #math.ceil(1 / (0.3 * (1 - 0.3)))
+opt_par_dict["Lgbm"]["p_ep"] = 2/3
+opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3)) #math.ceil(1 / (0.3 * (1 - 0.3)))
 
-# opt_par_dict["Lgbm"]["p_ep"] = 0.5
-# opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.5), 1/(1 - 0.5))
+# opt_par_dict["Lgbm"]["p_ep"] = 0.1
+# opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.1), 1/(1 - 0.1))
 
 
 # TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'
@@ -129,5 +135,5 @@ opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0
 #https://lightgbm.readthedocs.io/en/latest/Parameters.html#lambdarank_truncation_level
 dec_bound = True
 if dec_bound:
-    decision_boundary(['Logit'], opt_par_dict, X_train, y, y, task_dict=task_dict)
+    decision_boundary(['Lgbm'], opt_par_dict, X_train, y, y, task_dict=task_dict)
 
