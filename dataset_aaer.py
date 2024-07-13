@@ -182,7 +182,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_p_ep_val': 100,
+                            'p_ep_val': 1/3,
                             'n_n_found': 100},
                 'Logit': {'lambd': [0, 0.1, 1, 10],
                           'sigma': [1],
