@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_4'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -182,9 +182,9 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'p_ep_val': 1/3,
+                            'n_p_ep_val': 100,
                             'n_n_found': 100},
-                'Logit': {'lambd': [0, 0.1, 1],
+                'Logit': {'lambd': [0, 0.1, 1, 10],
                           'sigma': [1],
                           'subsample_undersample': [[None, None]],
                           'indic_approx': ['lambdaloss'],  # 'lambdaloss', 'logit'
@@ -267,7 +267,7 @@ if 'experiment_1' in experiments:
 
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
 
 
     name = 'AAER_experiment_1_info' + '.csv'
@@ -310,7 +310,7 @@ if 'experiment_2' in experiments:
 
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
 
 
     name = 'AAER_experiment_2_info' + '.csv'
@@ -432,7 +432,7 @@ if 'experiment_5' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
 
     name = 'AAER_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -471,7 +471,7 @@ if 'experiment_6' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Logit"]["p_ep"] = [0.1, 1/3, 0.5]
+    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
 
     name = 'AAER_experiment_6_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())

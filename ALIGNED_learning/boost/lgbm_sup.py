@@ -56,8 +56,6 @@ class Lgbm(Lightgbm):
                     ind_a = list(np.append(indices_1, ind_0))
                     ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
 
-                    #ind_tr = list(set(ind_undersample) & set(ind_subsample))
-                    #ind_tr = [value for value in ind_undersample if value in ind_subsample]
                 self.indices_list.append(ind_tr)
 
 
@@ -193,15 +191,6 @@ class Lgbm(Lightgbm):
                                       reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective=self.precision)
-
-        # if metric == 'uplift':
-        #
-        #     model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-        #                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-        #                               reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-        #                            min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-        #                            verbose=-1, objective=self.uplift)
-
 
         # Disable
         def blockPrint():

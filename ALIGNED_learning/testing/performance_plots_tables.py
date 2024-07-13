@@ -24,7 +24,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
     n_p_prec = par_dict_init.get('General_val_test').get("n_p_prec")
     p_rbp = par_dict_init.get('General_val_test').get("p_rbp")
     n_p_ep = par_dict_init.get('General_val_test').get("n_p_ep")
-    p_ep_val = par_dict_init.get('General_val_test').get("p_ep_val")
+    n_p_ep_val = par_dict_init.get('General_val_test').get("n_p_ep_val")
 
     #n_c_ep = par_dict_init.get('General_val_test').get("n_c_ep")
     n_n_found = par_dict_init.get('General_val_test').get("n_n_found")
@@ -89,7 +89,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 methods=methods, par_dict_init_cv=par_dict_init_cv, X=X,
                 y=y, y_c=y_c, train_index=train_index, validation_index=validation_index, name=name,
                 perf_ind=cross_val_perf_ind,
-                n_ratio=n_ratio, p_prec=n_p_prec, p_rbp=p_rbp, p_ep_val=p_ep_val, n_n_found = n_n_found, cost_train=cost_train,
+                n_ratio=n_ratio, p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep_val=n_p_ep_val, n_n_found = n_n_found, cost_train=cost_train,
                 cost_validate=cost_validate, skip_cross_validate = skip_cross_validate)
 
             par_dicts.append(par_dict)
@@ -539,7 +539,7 @@ def performances(predict_prob, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_fou
 
 
 def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index, validation_index,
-                               name, perf_ind, n_ratio, p_prec, p_rbp, p_ep_val, n_n_found, cost_train, cost_validate, skip_cross_validate):
+                               name, perf_ind, n_ratio, p_prec, p_rbp, n_p_ep_val, n_n_found, cost_train, cost_validate, skip_cross_validate):
 
     datapipeline = DivClean.divide_clean(X, train_index, validation_index)
 
@@ -602,13 +602,13 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                 if cost_validate == False:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=True)
 
                 if perf_ind == 'ap':
@@ -653,13 +653,13 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                 if cost_validate == False:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=True)
 
                 if perf_ind == 'ap':
@@ -698,13 +698,13 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
                 if cost_validate == False:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=False)
 
                 if cost_validate == True:
                     roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
                                                                                           n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
+                                                                                          n_p_ep=n_p_ep_val,
                                                                                           n_n_found=n_n_found, cost=False)
 
                 if perf_ind == 'ap':

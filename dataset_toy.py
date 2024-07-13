@@ -37,7 +37,7 @@ y_fe = np.ones(n_fe)
 
 #y_n = np.random.choice([0, 1], size=(n_n,), p=[0.7, 0.3])
 y_fc = np.random.choice([0, 1], size=(n_fc,), p=[0.5, 0.5])
-# y_fe = np.random.choice([0, 1], size=(n_fe,), p=[0.5, 0.5])
+y_fe = np.random.choice([0, 1], size=(n_fe,), p=[0.5, 0.5])
 
 
 x_n = np.concatenate((x_n_1, x_n_2), axis=1)
@@ -84,7 +84,7 @@ opt_par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 26,
                             'p_rbp': 0.9,
                             'n_p_ep': 26,
-                            'p_ep_val': 0.1,
+                            'n_p_ep_val': 26,
                             'n_n_found': 26},
                 'Logit': {'lambd': 0,
                           'sigma': 1,
@@ -94,9 +94,9 @@ opt_par_dict = {'General_val_test': {'n_ratio': 1,
                           },
                 'Lgbm': {"num_leaves": 5,
                          "n_estimators": 50,
-                         "lambd": 10,
+                         "lambd": 0,
                          "alpha": 0,
-                         "learning_rate": 0.1,
+                         "learning_rate": 0.01,
                          "sample_subsample_undersample": [None, 1],
                          "subsample_freq": 1,
                          "min_child_samples": 0,
@@ -124,8 +124,8 @@ opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0
 opt_par_dict["Lgbm"]["p_ep"] = 2/3
 opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3)) #math.ceil(1 / (0.3 * (1 - 0.3)))
 
-# opt_par_dict["Lgbm"]["p_ep"] = 0.1
-# opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.1), 1/(1 - 0.1))
+opt_par_dict["Lgbm"]["p_ep"] = 1/3
+opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(1/3), 1/(1 - 1/3))
 
 
 # TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'
