@@ -24,7 +24,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
     n_p_prec = par_dict_init.get('General_val_test').get("n_p_prec")
     p_rbp = par_dict_init.get('General_val_test').get("p_rbp")
     n_p_ep = par_dict_init.get('General_val_test').get("n_p_ep")
-    p_ep_val = par_dict_init.get('General_val_test').get("p_ep_val")
+    n_p_ep_val = par_dict_init.get('General_val_test').get("n_p_ep_val")
 
     #n_c_ep = par_dict_init.get('General_val_test').get("n_c_ep")
     n_n_found = par_dict_init.get('General_val_test').get("n_n_found")
@@ -72,59 +72,60 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         par_dicts = []
         datapipelines = []
 
-        for train_index, validation_index in zip(train_indexs, validation_indexs):
-            X_trains.append(X.iloc[train_index])
-            y_trains.append(np.array(y.iloc[train_index]))
-            y_cost_trains.append(np.array(y_c.iloc[train_index]))
-
-            # X_validations.append(X.iloc[validation_index])
-            # y_validations.append(np.array(y.iloc[validation_index]))
-            # y_cost_validations.append(np.array(y_c.iloc[validation_index]))
+        if skip_cross_validate == True:
 
             nam_spl = names[0].split('_')
             name = nam_spl[0] + '_' + nam_spl[1] + '_' + nam_spl[2] + '_' + nam_spl[3] + '_' + nam_spl[4]
             print('Cross validation ' + name)
 
-            par_dict, datapipeline = cross_validation_train_val(
+            for train_index, test_index in zip(train_indexs, test_indexs):
+                X_trains.append(X.iloc[train_index])
+                y_trains.append(np.array(y.iloc[train_index]))
+                y_cost_trains.append(np.array(y_c.iloc[train_index]))
+
+                X_tests.append(X.iloc[test_index])
+                y_tests.append(np.array(y.iloc[test_index]))
+                y_cost_tests.append(np.array(y_c.iloc[test_index]))
+
+                m_score_tests.append(np.array(m_score.iloc[test_index]))
+                f_score_tests.append(np.array(f_score.iloc[test_index]))
+
+                par_dict, datapipeline = pipeliner(X, train_index, test_index, name, par_dict)
+
+                par_dicts.append(par_dict)
+                datapipelines.append(datapipeline)
+
+            X_train_list.append(X_trains)
+            # X_validation_list.append(X_validations)
+
+            y_train_list.append(y_trains)
+            # y_validation_list.append(y_validations)
+
+            y_cost_train_list.append(y_cost_trains)
+            # y_cost_validation_list.append(y_cost_validations)
+
+            par_dict_list.append(par_dicts)
+            datapipeline_list.append(datapipelines)
+
+            X_test_list.append(X_tests)
+            y_test_list.append(y_tests)
+            y_cost_test_list.append(y_cost_tests)
+
+            m_score_test_list.append(m_score_tests)
+            f_score_test_list.append(f_score_tests)
+
+        if skip_cross_validate == False:
+
+            par_dict, _ = cross_validation_train_val(
                 methods=methods, par_dict_init_cv=par_dict_init_cv, X=X,
-                y=y, y_c=y_c, train_index=train_index, validation_index=validation_index, name=name,
+                y=y, y_c=y_c, train_indexs=train_indexs, validation_indexs=validation_indexs, names=names,
                 perf_ind=cross_val_perf_ind,
-                n_ratio=n_ratio, p_prec=n_p_prec, p_rbp=p_rbp, p_ep_val=p_ep_val, n_n_found = n_n_found, cost_train=cost_train,
+                n_ratio=n_ratio, p_prec=n_p_prec, p_rbp=p_rbp, n_p_ep_val=n_p_ep_val, n_n_found = n_n_found, cost_train=cost_train,
                 cost_validate=cost_validate, skip_cross_validate = skip_cross_validate)
 
-            par_dicts.append(par_dict)
-            datapipelines.append(datapipeline)
+            skip_cross_validate = True
 
-            if keep_first == True:
-                par_dict_init_cv = par_dict
-                skip_cross_validate = True
 
-        X_train_list.append(X_trains)
-        #X_validation_list.append(X_validations)
-
-        y_train_list.append(y_trains)
-        #y_validation_list.append(y_validations)
-
-        y_cost_train_list.append(y_cost_trains)
-        #y_cost_validation_list.append(y_cost_validations)
-
-        par_dict_list.append(par_dicts)
-        datapipeline_list.append(datapipelines)
-
-        for test_index in test_indexs:
-            X_tests.append(X.iloc[test_index])
-            y_tests.append(np.array(y.iloc[test_index]))
-            y_cost_tests.append(np.array(y_c.iloc[test_index]))
-
-            m_score_tests.append(np.array(m_score.iloc[test_index]))
-            f_score_tests.append(np.array(f_score.iloc[test_index]))
-
-        X_test_list.append(X_tests)
-        y_test_list.append(y_tests)
-        y_cost_test_list.append(y_cost_tests)
-
-        m_score_test_list.append(m_score_tests)
-        f_score_test_list.append(f_score_tests)
 
     roc_auc_df = pd.DataFrame()
     ap_df = pd.DataFrame()
@@ -251,8 +252,8 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         ep_c_df['F_score'] = ""
         n_found_c_df["F_score"] = ""
 
-    for i in range(np.shape(train_list)[0]):
-        for j in range(len(test_list[i])):
+    for i in range(np.shape(X_train_list)[0]):
+        for j in range(len(X_test_list[i])):
 
             X_train = X_train_list[i][j]
             y_train = y_train_list[i][j]
@@ -289,7 +290,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 ens, model_ensimb = MethodLearner.ensimb(par_dict_opt.get('ENSImb'), X_train_imp,
                                                          y_train)  # RusboostClassifier can't handle non-binairy data
 
-            for k in range(len(test_list[i])):
+            for k in range(len(X_test_list[i])):
 
                 X_test = X_test_list[i][k]
                 y_test = y_test_list[i][k]
@@ -537,27 +538,25 @@ def performances(predict_prob, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_fou
 
     return roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found
 
-# def pipeliner(X, train_index, validation_index, name, par_dict_init_cv):
-#
-#     datapipeline = DivClean.divide_clean(X, train_index, validation_index)
-#
-#     par_dict = copy.deepcopy(par_dict_init_cv)
-#     dict = copy.deepcopy(par_dict)
-#
-#     print(name + ' The optimal hyperparameters are ' + str(dict))
-#
-#     dic_name = name + '_dict.txt'
-#     path = (base_path / "../../tables/tables experiment info" / dic_name).resolve()
-#     with open(path, 'w') as f:
-#         json.dump(dict, f)
-#
-#     return dict, datapipeline
-
-
-def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index, validation_index,
-                               name, perf_ind, n_ratio, p_prec, p_rbp, p_ep_val, n_n_found, cost_train, cost_validate, skip_cross_validate):
+def pipeliner(X, train_index, validation_index, name, par_dict):
 
     datapipeline = DivClean.divide_clean(X, train_index, validation_index)
+
+    dict = copy.deepcopy(par_dict)
+
+    print(name + ' The optimal hyperparameters are ' + str(dict))
+
+    dic_name = name + '_dict.txt'
+    path = (base_path / "../../tables/tables experiment info" / dic_name).resolve()
+    with open(path, 'w') as f:
+        json.dump(dict, f)
+
+    return dict, datapipeline
+
+
+def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_indexs, validation_indexs,
+                               names, perf_ind, n_ratio, p_prec, p_rbp, n_p_ep_val, n_n_found, cost_train, cost_validate, skip_cross_validate):
+
 
     par_dict = copy.deepcopy(par_dict_init_cv)
     dict = copy.deepcopy(par_dict)
@@ -566,15 +565,6 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
 
         for k in dict:
             dict[k].clear()
-
-        X_train = X.iloc[train_index]
-        X_val = X.iloc[validation_index]
-
-        y_train = np.array(y.iloc[train_index])
-        y_val = np.array(y.iloc[validation_index])
-
-        y_cost_train = np.array(y_c.iloc[train_index])
-        y_cost_val = np.array(y_c.iloc[validation_index])
 
         if 'Logit' in methods:
             cart_prod_log = list(product(*par_dict.get('Logit').values()))
@@ -594,158 +584,175 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
             par_dict_ens = par_dict.fromkeys(keys_ens)
             per_matrix_ens = np.zeros(len(cart_prod_ens))
 
-        X_train_imp, X_val_imp, _ = scaler(
-            np.array(datapipeline.pipeline_trans(X_train)),
-            np.array(datapipeline.pipeline_trans(X_val)))
-        X_train_na, X_val_na, _ = scaler(
-            np.array(datapipeline.pipeline_trans(X_train, keep_nan=True)),
-            np.array(datapipeline.pipeline_trans(X_val, keep_nan=True)))
+        for train_index, validation_index, name in zip(train_indexs, validation_indexs, names):
 
-        if 'Logit' in methods:
+            nam_spl = name.split('_')
+            name = nam_spl[0] + '_' + nam_spl[1] + '_' + nam_spl[2] + '_' + nam_spl[3] + '_' + nam_spl[4]
+            print('Cross validation ' + name)
 
-            for j, value in enumerate(cart_prod_log):
-                for i, key in enumerate(keys_log):
-                    par_dict_log.update({key: value[i]})
+            datapipeline = DivClean.divide_clean(X, train_index, validation_index)
 
-                if cost_train == False:
-                    model = MethodLearner.logit(par_dict_log, X_train_imp, y_train, y_train)
-                    predict = model.predict_proba(X_val_imp)
+            X_train = X.iloc[train_index]
+            X_val = X.iloc[validation_index]
 
-                if cost_train == True:
-                    model = MethodLearner.logit(par_dict_log, X_train_imp, y_cost_train, y_train)
-                    predict = model.predict_proba(X_val_imp)
+            y_train = np.array(y.iloc[train_index])
+            y_val = np.array(y.iloc[validation_index])
 
-                if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=False)
+            y_cost_train = np.array(y_c.iloc[train_index])
+            y_cost_val = np.array(y_c.iloc[validation_index])
 
-                if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=True)
+            X_train_imp, X_val_imp, _ = scaler(
+                np.array(datapipeline.pipeline_trans(X_train)),
+                np.array(datapipeline.pipeline_trans(X_val)))
+            X_train_na, X_val_na, _ = scaler(
+                np.array(datapipeline.pipeline_trans(X_train, keep_nan=True)),
+                np.array(datapipeline.pipeline_trans(X_val, keep_nan=True)))
 
-                if perf_ind == 'ap':
-                    per_matrix_log[j] += ap
+            if 'Logit' in methods:
 
-                if perf_ind == 'roc_auc':
-                    per_matrix_log[j] += roc
+                for j, value in enumerate(cart_prod_log):
+                    for i, key in enumerate(keys_log):
+                        par_dict_log.update({key: value[i]})
 
-                if perf_ind == 'dcg':
-                    per_matrix_log[j] += dcg
+                    if cost_train == False:
+                        model = MethodLearner.logit(par_dict_log, X_train_imp, y_train, y_train)
+                        predict = model.predict_proba(X_val_imp)
 
-                if perf_ind == 'arp':
-                    per_matrix_log[j] += arp
+                    if cost_train == True:
+                        model = MethodLearner.logit(par_dict_log, X_train_imp, y_cost_train, y_train)
+                        predict = model.predict_proba(X_val_imp)
 
-                if perf_ind == 'precision':
-                    per_matrix_log[j] += precision
+                    if cost_validate == False:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=False)
 
-                if perf_ind == 'rbp':
-                    per_matrix_log[j] += rbp
+                    if cost_validate == True:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=True)
 
-                if perf_ind == 'uplift':
-                    per_matrix_log[j] += uplift
+                    if perf_ind == 'ap':
+                        per_matrix_log[j] += ap
 
-                if perf_ind == 'ep':
-                    per_matrix_log[j] += ep
+                    if perf_ind == 'roc_auc':
+                        per_matrix_log[j] += roc
 
-        if 'Lgbm' in methods:
+                    if perf_ind == 'dcg':
+                        per_matrix_log[j] += dcg
 
-            for j, value in enumerate(cart_prod_lgbm):
-                for i, key in enumerate(keys_lgbm):
-                    par_dict_lgbm.update({key: value[i]})
+                    if perf_ind == 'arp':
+                        per_matrix_log[j] += arp
 
-                if cost_train == False:
-                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na, y_train, y_train)
-                    predict = lgbmboost.predict_proba(model, X_val_na)
+                    if perf_ind == 'precision':
+                        per_matrix_log[j] += precision
 
-                if cost_train == True:
-                    lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na,
-                                                               y_cost_train, y_train)
-                    predict = lgbmboost.predict_proba(model, X_val_na)
+                    if perf_ind == 'rbp':
+                        per_matrix_log[j] += rbp
 
-                if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=False)
+                    if perf_ind == 'uplift':
+                        per_matrix_log[j] += uplift
 
-                if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=True)
+                    if perf_ind == 'ep':
+                        per_matrix_log[j] += ep
 
-                if perf_ind == 'ap':
-                    per_matrix_lgbm[j] += ap
+            if 'Lgbm' in methods:
 
-                if perf_ind == 'roc_auc':
-                    per_matrix_lgbm[j] += roc
+                for j, value in enumerate(cart_prod_lgbm):
+                    for i, key in enumerate(keys_lgbm):
+                        par_dict_lgbm.update({key: value[i]})
 
-                if perf_ind == 'dcg':
-                    per_matrix_lgbm[j] += dcg
+                    if cost_train == False:
+                        lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na, y_train, y_train)
+                        predict = lgbmboost.predict_proba(model, X_val_na)
 
-                if perf_ind == 'arp':
-                    per_matrix_lgbm[j] += arp
+                    if cost_train == True:
+                        lgbmboost, model = MethodLearner.lgbmboost(par_dict_lgbm, X_train_na,
+                                                                   y_cost_train, y_train)
+                        predict = lgbmboost.predict_proba(model, X_val_na)
 
-                if perf_ind == 'precision':
-                    per_matrix_lgbm[j] += precision
+                    if cost_validate == False:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=False)
 
-                if perf_ind == 'rbp':
-                    per_matrix_lgbm[j] += rbp
+                    if cost_validate == True:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=True)
 
-                if perf_ind == 'uplift':
-                    per_matrix_lgbm[j] += uplift
+                    if perf_ind == 'ap':
+                        per_matrix_lgbm[j] += ap
 
-                if perf_ind == 'ep':
-                    per_matrix_lgbm[j] += ep
+                    if perf_ind == 'roc_auc':
+                        per_matrix_lgbm[j] += roc
 
-        if 'ENSImb' in methods:
+                    if perf_ind == 'dcg':
+                        per_matrix_lgbm[j] += dcg
 
-            for j, value in enumerate(cart_prod_ens):
-                for i, key in enumerate(keys_ens):
-                    par_dict_ens.update({key: value[i]})
+                    if perf_ind == 'arp':
+                        per_matrix_lgbm[j] += arp
 
-                ensimb, model = MethodLearner.ensimb(par_dict_ens, X_train_imp, y_train)
-                predict = ensimb.predict_proba(model, X_val_imp)
+                    if perf_ind == 'precision':
+                        per_matrix_lgbm[j] += precision
 
-                if cost_validate == False:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=False)
+                    if perf_ind == 'rbp':
+                        per_matrix_lgbm[j] += rbp
 
-                if cost_validate == True:
-                    roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
-                                                                                          n_p_prec=p_prec, p_rbp=p_rbp,
-                                                                                          n_p_ep=p_ep_val*len(y_val),
-                                                                                          n_n_found=n_n_found, cost=False)
+                    if perf_ind == 'uplift':
+                        per_matrix_lgbm[j] += uplift
 
-                if perf_ind == 'ap':
-                    per_matrix_ens[j] += ap
+                    if perf_ind == 'ep':
+                        per_matrix_lgbm[j] += ep
 
-                if perf_ind == 'roc_auc':
-                    per_matrix_ens[j] += roc
+            if 'ENSImb' in methods:
 
-                if perf_ind == 'dcg':
-                    per_matrix_ens[j] += dcg
+                for j, value in enumerate(cart_prod_ens):
+                    for i, key in enumerate(keys_ens):
+                        par_dict_ens.update({key: value[i]})
 
-                if perf_ind == 'arp':
-                    per_matrix_ens[j] += arp
+                    ensimb, model = MethodLearner.ensimb(par_dict_ens, X_train_imp, y_train)
+                    predict = ensimb.predict_proba(model, X_val_imp)
 
-                if perf_ind == 'precision':
-                    per_matrix_ens[j] += precision
+                    if cost_validate == False:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=False)
 
-                if perf_ind == 'rbp':
-                    per_matrix_ens[j] += rbp
+                    if cost_validate == True:
+                        roc, ap, precision, dcg, arp, rbp, uplift, ep, n_found = performances(predict, y_cost_val, n_ratio=n_ratio,
+                                                                                              n_p_prec=p_prec, p_rbp=p_rbp,
+                                                                                              n_p_ep=n_p_ep_val,
+                                                                                              n_n_found=n_n_found, cost=False)
 
-                if perf_ind == 'uplift':
-                    per_matrix_ens[j] += uplift
+                    if perf_ind == 'ap':
+                        per_matrix_ens[j] += ap
 
-                if perf_ind == 'ep':
-                    per_matrix_ens[j] += ep
+                    if perf_ind == 'roc_auc':
+                        per_matrix_ens[j] += roc
+
+                    if perf_ind == 'dcg':
+                        per_matrix_ens[j] += dcg
+
+                    if perf_ind == 'arp':
+                        per_matrix_ens[j] += arp
+
+                    if perf_ind == 'precision':
+                        per_matrix_ens[j] += precision
+
+                    if perf_ind == 'rbp':
+                        per_matrix_ens[j] += rbp
+
+                    if perf_ind == 'uplift':
+                        per_matrix_ens[j] += uplift
+
+                    if perf_ind == 'ep':
+                        per_matrix_ens[j] += ep
 
         if 'Logit' in methods:
 
@@ -771,7 +778,7 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
             for i, key in enumerate(keys_ens):
                 dict['ENSImb'][key] = max_values[i]
 
-    print(name + ' The optimal hyperparameters are ' + str(dict))
+    print('The optimal hyperparameters are ' + str(dict))
 
     dic_name = name + '_dict.txt'
     path = (base_path / "../../tables/tables experiment info" / dic_name).resolve()

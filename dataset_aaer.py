@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_5'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -182,7 +182,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'p_ep_val': 1/3,
+                            'n_p_ep_val': 100,
                             'n_n_found': 100},
                 'Logit': {'lambd': [0, 0.1, 1, 10],
                           'sigma': [1],
@@ -191,12 +191,12 @@ def get_par_dict(optimisation_metric):
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0, 10], # [0, 10],
+                         "n_estimators": [50, 200],  # [50, 100],
+                         "lambd": [0], # [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [None, 1]],
+                         "sample_subsample_undersample": [[0.25, 0.25], [None, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -229,11 +229,11 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 
 
 
-train_period_list = [[[1996, 2000]], [[1997, 2001]], [[1998, 2002]], [[1999, 2003]], [[2000, 2004]],
+train_period_list = [[[1995, 1999], [1996, 2000], [1997, 2001]], [[1998, 2002]], [[1999, 2003]], [[2000, 2004]],
                                      [[2001, 2005]], [[2002, 2006]], [[2003, 2007]]]
-test_period_list = [[[None, None]], [[2002, 2002]], [[2003, 2003]], [[2004, 2004]], [[2005, 2005]],
+test_period_list = [[[None, None]], [[2003, 2003]], [[2004, 2004]], [[2005, 2005]],
                                      [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
-validation_list = [True, False, False, False, False, False, False,  False]
+validation_list = [True, False, False, False, False, False, False]
 
 
 feature_importance = False

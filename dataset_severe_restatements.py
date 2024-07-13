@@ -181,7 +181,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'p_ep_val': 1 / 3,
+                            'n_p_ep_val': 100,
                             'n_n_found':100},
                 'Logit': {'lambd': [0, 0.1, 1],
                           'sigma': [1],
@@ -195,7 +195,7 @@ def get_par_dict(optimisation_metric):
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None], [None, 1]], # [[0.05, None], [0.1, None]]
+                         "sample_subsample_undersample": [[0.1, 0.25], [0.2, 1]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -227,11 +227,11 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 #                  'lt', 'ivst', 'ni', 'pstk']
 
 
-train_period_list = [[[2000, 2004]], [[2001, 2005]], [[2002, 2006]], [[2003, 2007]], [[2004, 2008]], [[2005, 2009]],
-                                     [[2006, 2010]], [[2007, 2011]]]
-test_period_list = [[[None, None]], [[2006, 2006]], [[2007, 2007]], [[2008, 2008]], [[2009, 2009]], [[2010, 2010]],
-                                    [[2011, 2011]], [[2012, 2012]]]
-validation_list = [True, False, False, False, False, False, False, False]
+train_period_list = [[[2004, 2008], [2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
+                                     [[2010, 2014]], [[2011, 2015]], [[2012, 2016]]]
+test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+                                    [[2015, 2015]], [[2016, 2016]], [[2017, 2017]]]
+validation_list = [True, False, False, False, False, False, False]
 
 feature_importance = False
 stakeholder = 'Regulator'
