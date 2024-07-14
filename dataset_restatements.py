@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_7'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_restatement_1 = pd.read_csv(path, index_col=0)
@@ -191,11 +191,11 @@ def get_par_dict(optimisation_metric):
                           },
                 'Lgbm': {"num_leaves": [5],
                          "n_estimators": [50, 200],  # [50, 100],
-                         "lambd": [0], # [0, 10],
+                         "lambd": [0, 10], # [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, 0.25], [0.2, 1]],
+                         "sample_subsample_undersample": [[0.1, None]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -205,7 +205,7 @@ def get_par_dict(optimisation_metric):
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
-                           "learning_rate": [0.01, 0.001],
+                           "learning_rate": [0.1, 0.01],
                            "undersample": [0.5, 1],
                            "method": ['RUSBoost']}}
 
@@ -341,7 +341,7 @@ if 'experiment_3' in experiments:
 
     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
-    cross_val_perf_ind = 'ap'
+    cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
 
@@ -381,7 +381,7 @@ if 'experiment_4' in experiments:
 
     methods = ['Logit']
 
-    cross_val_perf_ind = 'ap'
+    cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
 
@@ -484,3 +484,48 @@ if 'experiment_6' in experiments:
                       cost_train=cost_train,
                       cost_validate=cost_validate, keep_first=True)
 
+
+
+
+
+if 'experiment_7' in experiments:
+
+    #feature_names.append('Log_market_cap_2016')
+
+    cost_train = True
+    cost_validate = False
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+
+    cross_val_perf_ind = 'arp'
+    optimisation_metric = 'basic'
+
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'AAER_experiment_7_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+
+    name = 'AAER_experiment_7_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate, keep_first=True)

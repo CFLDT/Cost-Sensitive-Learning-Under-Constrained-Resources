@@ -302,7 +302,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 m_score_test = m_score_test_list[i][k]
                 f_score_test = f_score_test_list[i][k]
 
-                name_test = name_list[i][k]
+                name_test = name_list[i+1][k]
                 nam_spl = name_test.split('_')
                 name = nam_spl[0] + '_' + nam_spl[1] + '_' + nam_spl[2] + '_' + nam_spl[3] + '_' + nam_spl[4]
 

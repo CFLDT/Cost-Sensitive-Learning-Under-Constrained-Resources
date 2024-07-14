@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_5'
+experiments = 'experiment_7'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -191,12 +191,12 @@ def get_par_dict(optimisation_metric):
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50, 200],  # [50, 100],
-                         "lambd": [0], # [0, 10],
+                         "n_estimators": [50, 100],  # [50, 100],
+                         "lambd": [0, 10], # [0, 10],
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.25, 0.25], [None, 1]],
+                         "sample_subsample_undersample": [[0.1, None]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -206,7 +206,7 @@ def get_par_dict(optimisation_metric):
                 # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
-                           "learning_rate": [0.01, 0.001],
+                           "learning_rate": [0.1, 0.01],
                            "undersample": [0.5, 1],
                            "method": ['RUSBoost']}}
 
@@ -342,7 +342,7 @@ if 'experiment_3' in experiments:
 
     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
-    cross_val_perf_ind = 'ap'
+    cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
 
@@ -382,7 +382,7 @@ if 'experiment_4' in experiments:
 
     methods = ['Logit']
 
-    cross_val_perf_ind = 'ap'
+    cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
 
@@ -519,7 +519,7 @@ if 'experiment_7' in experiments:
 
     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
-    cross_val_perf_ind = 'ap'
+    cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
 
@@ -561,7 +561,7 @@ if 'experiment_7' in experiments:
 #
 #     methods = ['Logit']
 #
-#     cross_val_perf_ind = 'ap'
+#     cross_val_perf_ind = 'arp'
 #     optimisation_metric = 'basic'
 #
 #
