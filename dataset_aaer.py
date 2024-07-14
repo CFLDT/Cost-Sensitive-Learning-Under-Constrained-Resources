@@ -182,7 +182,7 @@ def get_par_dict(optimisation_metric):
                             'n_p_prec': 100,
                             'p_rbp': 0.9,
                             'n_p_ep': 100,
-                            'n_p_ep_val': 100,
+                            'p_ep_val': 1/3,
                             'n_n_found': 100},
                 'Logit': {'lambd': [0, 0.1, 1, 10],
                           'sigma': [1],
@@ -228,11 +228,10 @@ feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs
 #                  'lt', 'ivst', 'ni', 'pstk']
 
 
-
-train_period_list = [[[1995, 1999], [1996, 2000], [1997, 2001]], [[1998, 2002]], [[1999, 2003]], [[2000, 2004]],
-                                     [[2001, 2005]], [[2002, 2006]], [[2003, 2007]]]
-test_period_list = [[[None, None]], [[2003, 2003]], [[2004, 2004]], [[2005, 2005]],
-                                     [[2006, 2006]], [[2007, 2007]], [[2008, 2008]]]
+train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
+                                     [[2010, 2014]], [[2011, 2015]]]
+test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+                                    [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
 
 
