@@ -84,7 +84,7 @@ opt_par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_p_prec': 26,
                             'p_rbp': 0.9,
                             'n_p_ep': 26,
-                            'p_ep_val': 0.1,
+                            'n_p_ep_val': 26,
                             'n_n_found': 26},
                 'Logit': {'lambd': 0,
                           'sigma': 1,
@@ -93,17 +93,17 @@ opt_par_dict = {'General_val_test': {'n_ratio': 1,
                           'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": 5,
-                         "n_estimators": 50,
+                         "n_estimators": 200,
                          "lambd": 0,
                          "alpha": 0,
                          "learning_rate": 0.01,
-                         "sample_subsample_undersample": [None, 1],
+                         "sample_subsample_undersample": [0.25, 0.25],
                          "subsample_freq": 1,
                          "min_child_samples": 0,
                          "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'
                          "sigma": 1,                   # 1 for validation 'binary' and 'lambdarank'
                          "indic_approx": 'lambdaloss',   #'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
-                         "metric": 'ep'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision, uplift
+                         "metric": 'precision'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision, uplift
 
 opt_par_dict["Logit"]["n_ratio"] = 1
 opt_par_dict["Logit"]["p_prec"] = 0.05

@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_7'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_severe_restatement_1 = pd.read_csv(path, index_col=0)
@@ -237,11 +237,50 @@ validation_list = [True, False, False, False, False, False, False]
 feature_importance = False
 stakeholder = 'Regulator'
 
-
 if 'experiment_1' in experiments:
 
-    cost_train = False
-    cost_validate = False
+    cost_train = True
+    cost_validate = True
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_severe_restatement,
+                        feature_names=feature_names,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm']
+
+    cross_val_perf_ind = 'precision'
+    optimisation_metric = 'ep'
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'Severerestatement_experiment_1_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 1 / 3, 0.5, 2 / 3]
+
+    name = 'Severerestatement_experiment_1_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate)
+
+if 'experiment_2' in experiments:
+
+    cost_train = True
+    cost_validate = True
     data_majority_undersample_train = None
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
@@ -259,16 +298,14 @@ if 'experiment_1' in experiments:
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_1_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severerestatement_experiment_2_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
+    par_dict["Lgbm"]["p_ep"] = [0.1, 1 / 3, 0.5, 2 / 3]
 
-
-    name = 'Severe_restatement_experiment_1_info' + '.csv'
+    name = 'Severerestatement_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -278,218 +315,12 @@ if 'experiment_1' in experiments:
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
                       cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
-
-if 'experiment_2' in experiments:
-
-    cost_train = False
-    cost_validate = False
-
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-    name_list, df_experiment_info = \
-        setting_creater(df_severe_restatement,
-                        feature_names=feature_names,
-                        train_period_list=train_period_list,
-                        test_period_list=test_period_list,
-                        stakeholder=stakeholder, validation_list=validation_list)
-
-    methods = ['Logit']
-
-    cross_val_perf_ind = 'ep'
-    optimisation_metric = 'ep'
-
-
-    for i_1 in range(len(name_list)):
-        for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_2_' + name_list[i_1][i_2]
-
-    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
-
-    par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
-
-
-    name = 'Severe_restatement_experiment_2_info' + '.csv'
-    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-
-    performance_check(methods=methods,
-                      par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-                      name_list=name_list, train_list=train_index_list,
-                      validate_list=validation_index_list, test_list=test_index_list,
-                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
+                      cost_validate=cost_validate)
 
 if 'experiment_3' in experiments:
 
     cost_train = False
-    cost_validate = False
-    data_majority_undersample_train = None
-
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-    name_list, df_experiment_info = \
-        setting_creater(df_severe_restatement,
-                        feature_names=feature_names,
-                        train_period_list=train_period_list,
-                        test_period_list=test_period_list,
-                        stakeholder=stakeholder, validation_list=validation_list)
-
-    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
-
-    cross_val_perf_ind = 'ap'
-    optimisation_metric = 'basic'
-
-
-    for i_1 in range(len(name_list)):
-        for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_3_' + name_list[i_1][i_2]
-
-    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
-    par_dict["Lgbm"]["n_ratio"] = [1]
-
-    name = 'Severe_restatement_experiment_3_info' + '.csv'
-    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-
-    performance_check(methods=methods,
-                      par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-                      name_list=name_list, train_list=train_index_list,
-                      validate_list=validation_index_list, test_list=test_index_list,
-                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
-
-if 'experiment_4' in experiments:
-
-    cost_train = False
-    cost_validate = False
-
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-    name_list, df_experiment_info = \
-        setting_creater(df_severe_restatement,
-                        feature_names=feature_names,
-                        train_period_list=train_period_list,
-                        test_period_list=test_period_list,
-                        stakeholder=stakeholder, validation_list=validation_list)
-
-    methods = ['Logit']
-
-    cross_val_perf_ind = 'ap'
-    optimisation_metric = 'basic'
-
-
-    for i_1 in range(len(name_list)):
-        for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_4_' + name_list[i_1][i_2]
-
-    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
-    par_dict["Logit"]["n_ratio"] = [1]
-
-    name = 'Severe_restatement_experiment_4_info' + '.csv'
-    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-
-    performance_check(methods=methods,
-                      par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-                      name_list=name_list, train_list=train_index_list,
-                      validate_list=validation_index_list, test_list=test_index_list,
-                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
-if 'experiment_5' in experiments:
-
-    cost_train = True
     cost_validate = True
-    data_majority_undersample_train = None
-
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-    name_list, df_experiment_info = \
-        setting_creater(df_severe_restatement,
-                        feature_names=feature_names,
-                        train_period_list=train_period_list,
-                        test_period_list=test_period_list,
-                        stakeholder=stakeholder, validation_list=validation_list)
-
-    methods = ['Lgbm']
-
-    cross_val_perf_ind = 'ep'
-    optimisation_metric = 'ep'
-
-    for i_1 in range(len(name_list)):
-        for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_5_' + name_list[i_1][i_2]
-
-    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
-    par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
-
-    name = 'Severe_restatement_experiment_5_info' + '.csv'
-    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-
-    performance_check(methods=methods,
-                      par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-                      name_list=name_list, train_list=train_index_list,
-                      validate_list=validation_index_list, test_list=test_index_list,
-                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
-if 'experiment_6' in experiments:
-
-    cost_train = True
-    cost_validate = True
-
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
-    name_list, df_experiment_info = \
-        setting_creater(df_severe_restatement,
-                        feature_names=feature_names,
-                        train_period_list=train_period_list,
-                        test_period_list=test_period_list,
-                        stakeholder=stakeholder, validation_list=validation_list)
-
-    methods = ['Logit']
-
-    cross_val_perf_ind = 'ep'
-    optimisation_metric = 'ep'
-
-    for i_1 in range(len(name_list)):
-        for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'Severe_restatement_experiment_6_' + name_list[i_1][i_2]
-
-    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
-
-    par_dict["Logit"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1/3, 0.5, 2/3]
-
-    name = 'Severe_restatement_experiment_6_info' + '.csv'
-    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
-
-    performance_check(methods=methods,
-                      par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
-                      name_list=name_list, train_list=train_index_list,
-                      validate_list=validation_index_list, test_list=test_index_list,
-                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
-                      cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
-
-
-if 'experiment_7' in experiments:
-
-    #feature_names.append('Log_market_cap_2016')
-
-    cost_train = True
-    cost_validate = False
     data_majority_undersample_train = None
 
     X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
@@ -505,16 +336,15 @@ if 'experiment_7' in experiments:
     cross_val_perf_ind = 'arp'
     optimisation_metric = 'basic'
 
-
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
-            name_list[i_1][i_2] = 'AAER_experiment_7_' + name_list[i_1][i_2]
+            name_list[i_1][i_2] = 'Severerestatement_experiment_3_' + name_list[i_1][i_2]
 
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
 
-    name = 'AAER_experiment_7_info' + '.csv'
+    name = 'Severerestatement_experiment_3_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,
@@ -524,4 +354,44 @@ if 'experiment_7' in experiments:
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
                       cost_train=cost_train,
-                      cost_validate=cost_validate, keep_first=True)
+                      cost_validate=cost_validate)
+
+if 'experiment_4' in experiments:
+
+    cost_train = True
+    cost_validate = True
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_severe_restatement,
+                        feature_names=feature_names,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+
+    cross_val_perf_ind = 'arp'
+    optimisation_metric = 'basic'
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'Severerestatement_experiment_4_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+
+    name = 'Severerestatement_experiment_4_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate)
+
