@@ -4,14 +4,13 @@ from .lgbm import Lightgbm
 import numpy as np
 import random
 import sys, os
-from scipy.stats import betabinom, beta
-from ALIGNED_learning.design.performance_metrics import PerformanceMetrics
-import math
+from scipy.stats import beta
 
 
 class Lgbm(Lightgbm):
 
-    def __init__(self, n_estimators, num_leaves, reg_lambda, reg_alpha, learning_rate, colsample_bytree, subsample, subsample_freq,
+    def __init__(self, n_estimators, num_leaves, reg_lambda, reg_alpha, learning_rate, colsample_bytree, subsample,
+                 subsample_freq,
                  undersample, min_child_samples, min_child_weight, sigma, indic_approx):
 
         self.n_estimators = n_estimators
@@ -28,9 +27,9 @@ class Lgbm(Lightgbm):
         self.sigma = sigma
         self.indic_approx = indic_approx
 
-        super().__init__(sigma,indic_approx)
+        super().__init__(sigma, indic_approx)
 
-    def fitting(self, X, y, y_clas, metric, n_ratio = None, p_prec = None, p_rbp = None, p_ep = None):
+    def fitting(self, X, y, y_clas, metric, n_ratio=None, p_prec=None, p_rbp=None, p_ep=None):
 
         random.seed(2290)
         np.random.seed(2290)
@@ -46,18 +45,24 @@ class Lgbm(Lightgbm):
             self.it_index = 0
             for i in range(self.n_estimators):
                 if ((self.undersample is not None) and (self.subsample is None)):
-                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])), replace=False)
+                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+                                             replace=False)
                     ind_tr = list(np.append(indices_1, ind_0))
                 if ((self.undersample is None) and (self.subsample is not None)):
                     ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
                     ind_tr = list(ind)
                 if ((self.undersample is not None) and (self.subsample is not None)):
-                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])), replace=False)
+                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+                                             replace=False)
                     ind_a = list(np.append(indices_1, ind_0))
                     ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
 
                 self.indices_list.append(ind_tr)
 
+        if ((self.undersample is None) and (self.subsample is None)):
+            lengh = len(y_clas)
+        else:
+            lengh = len(ind_tr)
 
         if metric == 'basic':
 
@@ -72,80 +77,66 @@ class Lgbm(Lightgbm):
             if np.array_equal(y, y.astype(bool)) == True:
 
                 model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                       reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                       subsample=self.subsample,  subsample_freq = self.subsample_freq,
-                                       neg_bagging_fraction = neg_bagging_fraction,
-                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                       verbose=-1)
+                                           learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                           reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                           subsample=self.subsample, subsample_freq=self.subsample_freq,
+                                           neg_bagging_fraction=neg_bagging_fraction,
+                                           min_child_samples=self.min_child_samples,
+                                           min_child_weight=self.min_child_weight,
+                                           verbose=-1)
 
             else:
 
                 model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                       reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                       subsample=self.subsample,  subsample_freq = self.subsample_freq,
-                                       neg_bagging_fraction = neg_bagging_fraction,
-                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                       verbose=-1)
+                                          learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                          reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                          subsample=self.subsample, subsample_freq=self.subsample_freq,
+                                          neg_bagging_fraction=neg_bagging_fraction,
+                                          min_child_samples=self.min_child_samples,
+                                          min_child_weight=self.min_child_weight,
+                                          verbose=-1)
         if metric == 'lambdarank':
             self.n = int(n_ratio * len(y))
 
             model = lgb.LGBMRanker(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                   reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
                                    lambdarank_truncation_level=self.n, lambdarank_norm=False,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective='lambdarank')
 
         if metric == 'arp':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.arp)
-
-
-        if metric == 'lambdarank_1':
-            model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.lambdarank)
-
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                      verbose=-1, objective=self.arp)
 
         if metric == 'dcg':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.dcg)
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                      verbose=-1, objective=self.dcg)
 
         if metric == 'roc_auc':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.roc_auc)
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                      verbose=-1, objective=self.roc_auc)
 
         if metric == 'ap':
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.ap)
-
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                      verbose=-1, objective=self.ap)
 
         if metric == 'ep':
 
-            if ((self.undersample is None) and (self.subsample is None)):
-                lengh = len(y_clas)
-            else:
-                lengh = len(ind_tr)
-
             self.p_ep = p_ep
-            #self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
-            self.n_ep = max(1/(p_ep), 1/(1 - p_ep))
+            self.n_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 
             disc = 0
             discounter = np.zeros(lengh)
@@ -164,33 +155,22 @@ class Lgbm(Lightgbm):
                 disc = disc + (prob / (i))
                 discounter[i - 1] = disc
 
-            self.discounter = discounter*lengh
+            self.discounter = discounter * lengh
 
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                   reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.ep)
-
-        if metric == 'rbp':
-
-            self.p_rbp = p_rbp
-
-            model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                    reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.rbp)
+                                      verbose=-1, objective=self.ep)
 
         if metric == 'precision':
-
-            self.n_prec = int(p_prec*len(y_clas))
+            self.n_prec = int(p_prec * lengh)
 
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                                   learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                                      reg_alpha=self.reg_alpha, colsample_bytree = self.colsample_bytree,
-                                   min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
-                                   verbose=-1, objective=self.precision)
+                                      learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                                      reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
+                                      verbose=-1, objective=self.precision)
 
         # Disable
         def blockPrint():
@@ -200,14 +180,12 @@ class Lgbm(Lightgbm):
         def enablePrint():
             sys.stdout = sys.__stdout__
 
-        # Output of Lightgbm is kinda annoying, and verbose is bugged
-        #blockPrint()
+        # blockPrint()
         if metric != 'basic':
-            #model.fit(X, y, group=[X.shape[0]])
             model.fit(X, y)
         if metric == 'basic':
             model.fit(X, y)
-        #enablePrint()
+        # enablePrint()
 
         endtimer = timer()
 

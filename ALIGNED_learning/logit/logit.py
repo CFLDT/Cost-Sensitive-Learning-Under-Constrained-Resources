@@ -2,7 +2,6 @@ import numpy as np
 import scipy.optimize
 from scipy.stats import rankdata
 from ALIGNED_learning.design.performance_metrics import PerformanceMetrics
-from scipy.stats import betabinom
 
 
 class Lgt:
@@ -36,7 +35,6 @@ class Lgt:
 
         return scores
 
-
     def optimization_basic(self, obj_func, initial_theta):
         opt_res = scipy.optimize.minimize(obj_func, initial_theta, method="L-BFGS-B",  # L-BFGS-B uses approx of hessian
                                           options={'disp': False, 'maxiter': 100000})
@@ -54,9 +52,9 @@ class Lgt:
         return objective
 
     def optimization_rank(self, obj_func, initial_theta):
-        # atm we do not use hessian information
+        # We do not use hessian information
         opt_res = scipy.optimize.minimize(obj_func, initial_theta, method="L-BFGS-B",
-                                          jac=True, options={'disp': False, 'maxiter': 100000, 'ftol':1e-8 })
+                                          jac=True, options={'disp': False, 'maxiter': 100000, 'ftol': 1e-8})
         theta_opt, func_min = opt_res.x, opt_res.fun
         return theta_opt, func_min
 
@@ -72,8 +70,6 @@ class Lgt:
         delta_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
         lamb_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
         lamb_ij_2 = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
-        #lambd_der_ij = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
-        #lambd_der_ij_2 = np.zeros(shape=np.shape(diff_ij), dtype=np.float32)
         sigma = self.sigma
 
         if np.all(y_pred == 0):
@@ -81,8 +77,6 @@ class Lgt:
             np.random.shuffle(ranks)
         else:
             ranks = rankdata(-y_pred, method='ordinal')  # ordinal. If average dcg issues due to log(0)
-
-        # ranks = rankdata(-y_pred, method='ordinal')         # COMPARE : use this line of code
 
         ranks_v_stack = np.vstack([ranks] * np.shape(ranks)[0])
         ranks_v_stack_trans = ranks_v_stack.T
@@ -109,7 +103,6 @@ class Lgt:
             lamb_ij_2[bool_true] = np.multiply(constant_ij[bool_true],
                                                np.multiply(P_ij[bool_true], 1 - P_ij[bool_true]))
 
-
         if self.indic_approx == 'lambdaloss':
             constant_ij[bool_true] = np.multiply(sigma, H_ij[bool_true]) / np.log(2)
             P_ij[bool_true] = np.log2(1 + np.exp(sigma * (diff_ij[bool_true])))
@@ -126,12 +119,7 @@ class Lgt:
         grad_i = np.sum(lamb_ij, axis=1) + np.sum(lamb_ij_2, axis=0)
         grad = grad_i.dot(X) + 2 * self.lambd * theta
 
-        # Hessian
-
-        # hess_i = np.abs(np.sum(lambd_der_ij, axis=1) + np.sum(lambd_der_ij_2, axis=0))
-        # hess = hess_i.dot(X)
-
-        return grad  # hess
+        return grad
 
     def arp(self, theta, X, y_true):
 
@@ -157,7 +145,7 @@ class Lgt:
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
+                                                          lamb_ij, lamb_ij_2)
         # Grad
 
         grad = self.grad(X, theta, lamb_ij, lamb_ij_2)
@@ -167,7 +155,7 @@ class Lgt:
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
         # obj = -PerformanceMetricsTrain.performance_metrics_arp(y_pred, y_true)
 
-        #print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -203,9 +191,8 @@ class Lgt:
         sorted_ar = [x for _, x in sorted(zip(ind, y_true_ranked))]
         value = np.cumsum(np.array(sorted_ar))
 
-        diff_output_1[(bool_true)] = value[input_1[(bool_true)]-1]
-        diff_output_2[(bool_true)] = value[input_2[(bool_true)]-1]
-
+        diff_output_1[(bool_true)] = value[input_1[(bool_true)] - 1]
+        diff_output_2[(bool_true)] = value[input_2[(bool_true)] - 1]
 
         # diff_output_1[(bool_true)] = np.array([value[int(i - 1)] for i in input_1[(bool_true)]])
         # diff_output_2[(bool_true)] = np.array([value[int(i - 1)] for i in input_2[(bool_true)]])
@@ -228,7 +215,7 @@ class Lgt:
         if np.all(y_pred == 0):
             obj = obj + 100
 
-        #print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -265,21 +252,18 @@ class Lgt:
         denom = np.arange(len(y_pred)) + 1
         value = np.cumsum(sorted_ar) / denom
 
-        diff_output_1[(bool_true)] = value[input_1[(bool_true)]-1]
-        diff_output_2[(bool_true)] = value[input_2[(bool_true)]-1]
-
+        diff_output_1[(bool_true)] = value[input_1[(bool_true)] - 1]
+        diff_output_2[(bool_true)] = value[input_2[(bool_true)] - 1]
 
         # diff_output_1[(bool_true)] = np.array([value[int(i-1)] for i in input_1[(bool_true)]])
         # diff_output_2[(bool_true)] = np.array([value[int(i-1)] for i in input_2[(bool_true)]])
 
         delta_ij[bool_true] = np.abs(diff_output_1[bool_true] - diff_output_2[bool_true])
 
-
-
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
+                                                          lamb_ij, lamb_ij_2)
 
         # Grad
 
@@ -292,7 +276,7 @@ class Lgt:
         if np.all(y_pred == 0):
             obj = obj + 100
 
-        #print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -325,7 +309,7 @@ class Lgt:
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
+                                                          lamb_ij, lamb_ij_2)
 
         # Grad
 
@@ -336,7 +320,7 @@ class Lgt:
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
         # obj = -PerformanceMetricsTrain.performance_metrics_dcg(y_pred, y_true)
 
-        #print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -370,15 +354,15 @@ class Lgt:
         input_1[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])
         input_2[(bool_true)] = np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) + 1
 
-        diff_output_1[(bool_true)] = self.discounter[input_1[(bool_true)]-1]
-        diff_output_2[(bool_true)] = self.discounter[input_2[(bool_true)]-1]
+        diff_output_1[(bool_true)] = self.discounter[input_1[(bool_true)] - 1]
+        diff_output_2[(bool_true)] = self.discounter[input_2[(bool_true)] - 1]
 
         delta_ij[bool_true] = np.abs(diff_output_1[bool_true] - diff_output_2[bool_true])
 
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
+                                                          lamb_ij, lamb_ij_2)
 
         # Grad
 
@@ -390,51 +374,6 @@ class Lgt:
         # obj = -PerformanceMetricsTrain.performance_metrics_ep(y_pred, y_true)
 
         print('Optimisation Objective: ' + str(obj))
-
-        return obj, grad
-
-    def rbp(self, theta, X, y_true):
-
-        # Variables
-
-        y_pred = X.dot(theta)
-
-        # Variables
-
-        diff_ij, G_ij, H_ij, P_ij, P_ji, constant_ij, delta_ij, lamb_ij, lamb_ij_2, sigma, ranks_v_stack_trans, \
-        ranks_v_stack, y_true_v_stack_trans, y_true_v_stack, y_pred_v_stack_trans, \
-        y_pred_v_stack, bool_true = self.variables_init(y_true, y_pred)
-
-        # Base Value
-
-        rbp_max = PerformanceMetrics.performance_metrics_rbp(y_true, y_true, self.p_rbp, maximum=True)
-
-        # Lambda_ij calculation
-
-        diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (rbp_max)
-
-        delta_ij[bool_true] = np.abs(self.p_rbp ** (np.abs(ranks_v_stack_trans[bool_true] -
-                                                           ranks_v_stack[bool_true]) - 1) -
-                                     self.p_rbp ** (np.abs(ranks_v_stack_trans[bool_true] -
-                                                           ranks_v_stack[bool_true])))
-
-        H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
-
-        P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
-
-        # Grad
-
-        grad = self.grad(X, theta, lamb_ij, lamb_ij_2)
-
-        # Performance metrics
-
-        obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_rbp(y_pred, y_true)
-
-        #print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -477,7 +416,7 @@ class Lgt:
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2 = self.lambda_calc(bool_true, sigma, constant_ij, H_ij, diff_ij, P_ji, P_ij,
-                                                                                        lamb_ij, lamb_ij_2)
+                                                          lamb_ij, lamb_ij_2)
 
         # Grad
 
@@ -491,6 +430,3 @@ class Lgt:
         # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
-
-
-

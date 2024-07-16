@@ -236,7 +236,7 @@ def target_calculator(y_pred, y_true, y_infer, target_metric, p_inferred, p_ep =
 
 
 
-# dice example
+# dice toy example
 
 # y = np.zeros(6)
 #

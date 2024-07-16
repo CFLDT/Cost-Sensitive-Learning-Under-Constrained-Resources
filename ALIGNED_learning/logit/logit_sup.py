@@ -2,9 +2,7 @@ from timeit import default_timer as timer
 import numpy as np
 import random
 from .logit import Lgt
-from scipy.stats import betabinom, beta
-from ALIGNED_learning.design.performance_metrics import PerformanceMetrics
-import math
+from scipy.stats import beta
 
 
 class Logit(Lgt):
@@ -16,7 +14,7 @@ class Logit(Lgt):
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
-    def fitting(self, X, y, y_clas, init_theta, metric, n_ratio = None, p_prec=None, p_rbp=None, p_ep=None):
+    def fitting(self, X, y, y_clas, init_theta, metric, n_ratio=None, p_prec=None, p_rbp=None, p_ep=None):
 
         random.seed(2290)
         np.random.seed(2290)
@@ -31,19 +29,19 @@ class Logit(Lgt):
             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
                                      replace=False)
             ind_tr = list(np.append(indices_1, ind_0))
-            X = X[ind_tr,:]
+            X = X[ind_tr, :]
             y = y[ind_tr]
         if ((self.undersample is None) and (self.subsample is not None)):
             ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
             ind_tr = list(ind)
-            X = X[ind_tr,:]
+            X = X[ind_tr, :]
             y = y[ind_tr]
         if ((self.undersample is not None) and (self.subsample is not None)):
             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
                                      replace=False)
             ind_a = list(np.append(indices_1, ind_0))
             ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
-            X = X[ind_tr,:]
+            X = X[ind_tr, :]
             y = y[ind_tr]
 
         self.n = int(n_ratio * len(y))
@@ -67,16 +65,12 @@ class Logit(Lgt):
 
         if metric == 'arp':
 
-            #self.arp_max = PerformanceMetrics.performance_metrics_arp(y, y, maximum=True)
-
             def obj_func(theta):
                 return self.arp(theta, X, y)
 
             self.theta, func_min = self.optimization_rank(obj_func, init_theta)
 
         if metric == 'roc_auc':
-
-            #self.roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.roc_auc(theta, X, y)
@@ -85,16 +79,12 @@ class Logit(Lgt):
 
         if metric == 'ap':
 
-            #self.ap_max = PerformanceMetrics.performance_metrics_ap(y, y, maximum=True)
-
             def obj_func(theta):
                 return self.ap(theta, X, y)
 
             self.theta, func_min = self.optimization_rank(obj_func, init_theta)
 
         if metric == 'dcg':
-
-            #self.ndcg_max = PerformanceMetrics.performance_metrics_dcg(y, y, maximum=True)
 
             def obj_func(theta):
                 return self.dcg(theta, X, y)
@@ -104,8 +94,7 @@ class Logit(Lgt):
         if metric == 'ep':
 
             self.p_ep = p_ep
-            #self.n_ep = math.ceil(1 / (p_ep * (1 - p_ep)))
-            self.n_ep = max(1/(p_ep), 1/(1 - p_ep))
+            self.n_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 
             discounter = np.zeros(len(y))
             disc = 0
@@ -123,26 +112,15 @@ class Logit(Lgt):
                 disc = disc + (prob / (i))
                 discounter[i - 1] = disc
 
-            self.discounter = discounter*len(y)
-            #self.ep_max = PerformanceMetrics.performance_metrics_ep(y, y, self.p_ep, self.n_ep, maximum=True)
+            self.discounter = discounter * len(y)
 
             def obj_func(theta):
                 return self.ep(theta, X, y)
 
             self.theta, func_min = self.optimization_rank(obj_func, init_theta)
 
-        if metric == 'rbp':
-            self.p_rbp = p_rbp
-            #self.rbp_max = PerformanceMetrics.performance_metrics_rbp(y, y, self.p_rbp, maximum=True)
-
-            def obj_func(theta):
-                return self.rbp(theta, X, y)
-
-            self.theta, func_min = self.optimization_rank(obj_func, init_theta)
-
         if metric == 'precision':
-            self.n_prec = int(p_prec*len(y))
-            #self.precision_max = PerformanceMetrics.performance_metrics_precision(y, y, self.n_prec, maximum=True)
+            self.n_prec = int(p_prec * len(y))
 
             def obj_func(theta):
                 return self.precision(theta, X, y)

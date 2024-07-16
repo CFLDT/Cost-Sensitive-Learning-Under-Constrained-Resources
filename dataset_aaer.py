@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_8'
+experiments = 'experiment_1'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -50,15 +50,6 @@ def setting_creater(df, feature_names, train_period_list,
     # replace infs with nan
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-    """
-    undersampling
-    """
-    # if data_majority_undersample is not None:
-    #     df = df.drop(
-    #         df.query('AAER == 0').sample(frac=data_majority_undersample, random_state=2290).index)
-    #     df = df.reset_index(drop=True)
-
-
     df = df.reset_index(drop=True)
 
     """
@@ -75,10 +66,16 @@ def setting_creater(df, feature_names, train_period_list,
     id_fraud_indenticator = df_y['AAER_ID'].copy()
     labeled_fraud_indicator = df_y['AAER'].copy()
 
-    if stakeholder == 'Regulator':
+    if stakeholder == 'Regulator_5':
         y_c_copy_cost = df_y_c['AAER'].copy()
         y_c_copy_cost = np.multiply(df_y_c['Market_cap_all_loss_2016'], y_c_copy_cost) + \
                         np.multiply(- df_y_c['Market_cap_5_per_loss_2016'], 1 - y_c_copy_cost)
+        df_y_c['AAER'] = y_c_copy_cost
+
+    if stakeholder == 'Regulator_15':
+        y_c_copy_cost = df_y_c['AAER'].copy()
+        y_c_copy_cost = np.multiply(df_y_c['Market_cap_all_loss_2016'], y_c_copy_cost) + \
+                        np.multiply(- df_y_c['Market_cap_15_per_loss_2016'], 1 - y_c_copy_cost)
         df_y_c['AAER'] = y_c_copy_cost
 
     y = df_y['AAER']
@@ -102,20 +99,7 @@ def setting_creater(df, feature_names, train_period_list,
             else:
                 val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
 
-
-            # if data_majority_undersample_train is not None:
-            #     train_index = df.index[train_bool].tolist()
-            #     df_train_index = df.loc[train_index]
-            #
-            #     df_train_index = df_train_index.drop(
-            #         df_train_index.query('AAER == 0').sample(frac=data_majority_undersample_train, random_state=2290).index)
-            #
-            #     train_index = df_train_index.index.tolist()
-            #
-            # else:
-
             train_index = df.index[train_bool].tolist()
-
             validation_index = df.index[val_bool].tolist()
 
             train_id = id_fraud_indenticator[train_bool]
@@ -196,7 +180,7 @@ def get_par_dict(optimisation_metric):
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.1, None]],
+                         "sample_subsample_undersample": [[0.01, None]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -212,20 +196,9 @@ def get_par_dict(optimisation_metric):
 
     return par_dict
 
-
-# Dechow
 feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
                  'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
                  'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
-
-# Bao
-# feature_names = ['csho', 'act', 'sstk', 'ppegt',
-#                  'ap', 'che', 'prcc_c', 're',
-#                  'invt', 'ceq', 'dlc', 'dp',
-#                  'rect', 'cogs', 'at', 'dltis',
-#                  'ib', 'dltt', 'xint', 'txt',
-#                  'lct', 'sale', 'txp', 'ivao',
-#                  'lt', 'ivst', 'ni', 'pstk']
 
 
 train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
@@ -235,8 +208,14 @@ test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013
 validation_list = [True, False, False, False, False, False, False]
 
 
+train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2010, 2010]]]
+test_period_list = [[[None, None]], [[2011, 2011], [2012, 2012]], [[2010, 2010]]]
+validation_list = [True, False, False]
+
+
+
 feature_importance = False
-stakeholder = 'Regulator'
+stakeholder = 'Regulator_5'
 
 
 if 'experiment_1' in experiments:
@@ -265,7 +244,7 @@ if 'experiment_1' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5, 2/3]
+    par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
 
     name = 'AAER_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -296,7 +275,7 @@ if 'experiment_2' in experiments:
 
     methods = ['Lgbm']
 
-    cross_val_perf_ind = 'ep'
+    cross_val_perf_ind = 'uplift'
     optimisation_metric = 'ep'
 
     for i_1 in range(len(name_list)):
@@ -306,7 +285,7 @@ if 'experiment_2' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [0.1, 1/3, 0.5, 2/3]
+    par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
 
     name = 'AAER_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
