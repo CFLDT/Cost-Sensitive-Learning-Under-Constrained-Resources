@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_2'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -180,7 +180,7 @@ def get_par_dict(optimisation_metric):
                          "alpha": [0],
                          "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
-                         "sample_subsample_undersample": [[0.01, None]],
+                         "sample_subsample_undersample": [[0.1, None]],
                          "subsample_freq": [1],
                          "min_child_samples": [0],
                          "min_child_weight": [1e-3], # 1e-3 do not change to zero. this causes issues regarding validation 'binary' and 'lambdarank'
@@ -206,12 +206,6 @@ train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]
 test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
-
-
-train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2010, 2010]]]
-test_period_list = [[[None, None]], [[2011, 2011], [2012, 2012]], [[2010, 2010]]]
-validation_list = [True, False, False]
-
 
 
 feature_importance = False
