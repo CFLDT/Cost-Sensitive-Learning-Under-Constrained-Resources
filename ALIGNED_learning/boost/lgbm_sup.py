@@ -76,25 +76,39 @@ class Lgbm(Lightgbm):
 
             if np.array_equal(y, y.astype(bool)) == True:
 
-                model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
+                # model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
+                #                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                #                            reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                #                            subsample=self.subsample, subsample_freq=self.subsample_freq,
+                #                            neg_bagging_fraction=neg_bagging_fraction,
+                #                            min_child_samples=self.min_child_samples,
+                #                            min_child_weight=self.min_child_weight,
+                #                            verbose=-1)
+
+                model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                            reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
-                                           subsample=self.subsample, subsample_freq=self.subsample_freq,
-                                           neg_bagging_fraction=neg_bagging_fraction,
                                            min_child_samples=self.min_child_samples,
                                            min_child_weight=self.min_child_weight,
-                                           verbose=-1)
+                                           verbose=-1,objective=self.basic)
 
             else:
+
+                # model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
+                #                           learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
+                #                           reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                #                           subsample=self.subsample, subsample_freq=self.subsample_freq,
+                #                           neg_bagging_fraction=neg_bagging_fraction,
+                #                           min_child_samples=self.min_child_samples,
+                #                           min_child_weight=self.min_child_weight,
+                #                           verbose=-1)
 
                 model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                           learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                           reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
-                                          subsample=self.subsample, subsample_freq=self.subsample_freq,
-                                          neg_bagging_fraction=neg_bagging_fraction,
                                           min_child_samples=self.min_child_samples,
                                           min_child_weight=self.min_child_weight,
-                                          verbose=-1)
+                                          verbose=-1,objective=self.reg)
         if metric == 'lambdarank':
             self.n = int(n_ratio * len(y))
 
@@ -181,10 +195,7 @@ class Lgbm(Lightgbm):
             sys.stdout = sys.__stdout__
 
         # blockPrint()
-        if metric != 'basic':
-            model.fit(X, y)
-        if metric == 'basic':
-            model.fit(X, y)
+        model.fit(X, y)
         # enablePrint()
 
         endtimer = timer()

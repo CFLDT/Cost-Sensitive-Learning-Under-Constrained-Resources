@@ -498,3 +498,56 @@ class Lightgbm:
         return grad, hess
 
 
+    def basic(self, y_true, y_pred):
+
+        if ((self.undersample is not None) or (self.subsample is not None)):
+            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+
+            y_true = y_true.flat[self.indices_list[self.it_index]]
+            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+
+        scores_1 = -1 / (1 + np.exp(y_pred))
+        scores_0 = 1 / (1 + np.exp(-y_pred))
+
+        sec_der_1 = np.multiply(-scores_1, 1 + scores_1)
+        sec_der_0 = np.multiply(scores_0, 1 - scores_0)
+
+        grad = np.multiply(y_true, scores_1) \
+               + np.multiply(1-y_true, scores_0)
+        hess = np.abs(np.multiply(y_true, sec_der_1)
+                      + np.multiply(1-y_true, sec_der_0))
+
+        if ((self.undersample is not None) or (self.subsample is not None)):
+            grad_1.flat[self.indices_list[self.it_index]] = grad
+            hess_1.flat[self.indices_list[self.it_index]] = hess
+
+            grad = grad_1
+            hess = hess_1
+            self.it_index = self.it_index + 1
+
+
+        return grad, hess
+
+
+    def reg(self, y_true, y_pred):
+
+        if ((self.undersample is not None) or (self.subsample is not None)):
+            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+
+            y_true = y_true.flat[self.indices_list[self.it_index]]
+            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+
+        grad = 2*(y_pred - y_true)
+        hess = 2*np.ones(len(y_true))
+
+        if ((self.undersample is not None) or (self.subsample is not None)):
+            grad_1.flat[self.indices_list[self.it_index]] = grad
+            hess_1.flat[self.indices_list[self.it_index]] = hess
+
+            grad = grad_1
+            hess = hess_1
+            self.it_index = self.it_index + 1
+
+        return grad, hess

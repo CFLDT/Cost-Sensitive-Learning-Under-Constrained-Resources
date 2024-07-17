@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_3'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_severe_restatement_1 = pd.read_csv(path, index_col=0)
@@ -209,6 +209,12 @@ train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]
 test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
+
+# train_period_list = [[[2006, 2008], [2007, 2009]], [[2008, 2010]], [[2009, 2011]], [[2010, 2012]], [[2011, 2013]],
+#                                      [[2012, 2014]], [[2013, 2015]]]
+# test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+#                                     [[2015, 2015]], [[2016, 2016]]]
+# validation_list = [True, False, False, False, False, False, False]
 
 
 feature_importance = False

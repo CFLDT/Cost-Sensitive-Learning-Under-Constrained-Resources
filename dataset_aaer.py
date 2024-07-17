@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_2'
+experiments = 'experiment_4'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -114,6 +114,79 @@ def setting_creater(df, feature_names, train_period_list,
             train_indexs.append(train_index)
             validation_indexs.append(validation_index)
 
+
+            # if validations == True:
+            #
+            #     financial_misconduct_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]) & (
+            #                 labeled_fraud_indicator == 1))
+            #     non_label_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]) & (
+            #                 labeled_fraud_indicator == 0))
+            #
+            #     financial_misconduct = df[financial_misconduct_bool]
+            #     non_label = df[non_label_bool]
+            #
+            #     df_per_fin_mis_train_x = pd.Series(financial_misconduct.groupby('CIK').groups.keys()).sample(frac=0.75,
+            #                                                                                                  random_state=2290)
+            #     df_per_fin_mis_train = financial_misconduct[
+            #         financial_misconduct['CIK'].isin(df_per_fin_mis_train_x.tolist())]
+            #
+            #     df_per_fin_mis_val = financial_misconduct.drop(df_per_fin_mis_train.index)
+            #     df_per_fin_mis_val_x = pd.Series(df_per_fin_mis_val.groupby('CIK').groups.keys())
+            #
+            #     df_per_label_bool_train_x = pd.Series(non_label.groupby('CIK').groups.keys()).sample(frac=0.75,
+            #                                                                                          random_state=2290)
+            #
+            #     # Use all CIK in the non label train sample. Additionally include all observations of CIK in the train that are labelled.
+            #     # Omit all observations of CIK in the validation that are labelled
+            #     df_per_label_bool_train = non_label[((((non_label['CIK'].isin(df_per_label_bool_train_x.tolist())) |
+            #                                            (non_label['CIK'].isin(df_per_fin_mis_train_x.tolist())))) &
+            #                                          (~non_label['CIK'].isin(df_per_fin_mis_val_x.tolist())))]
+            #
+            #     df_per_fin_mis_val = financial_misconduct.drop(df_per_fin_mis_train.index)
+            #     df_per_label_bool_val = non_label.drop(df_per_label_bool_train.index)
+            #
+            #     train_bool_fin_mis = financial_misconduct_bool.index.isin(df_per_fin_mis_train.index)
+            #     train_bool_label_bool = non_label_bool.index.isin(df_per_label_bool_train.index)
+            #     train_bool = train_bool_fin_mis ^ train_bool_label_bool
+            #
+            #     val_bool_fin_mis = financial_misconduct_bool.index.isin(df_per_fin_mis_val.index)
+            #     val_bool_label_bool = non_label_bool.index.isin(df_per_label_bool_val.index)
+            #     val_bool = val_bool_fin_mis ^ val_bool_label_bool
+            #
+            #     train_index = df.index[train_bool].tolist()
+            #     validation_index = df.index[val_bool].tolist()
+            #
+            #     train_indexs.append(train_index)
+            #     validation_indexs.append(validation_index)
+            #
+            #     train_id = id_fraud_indenticator[train_bool]
+            #     validation_id = id_fraud_indenticator[val_bool]
+            #
+            #     train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
+            #     validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
+            #
+            # if validations == False:
+            #
+            #     train_bool = ((df['Year'] >= train_period[0]) & (df['Year'] <= train_period[1]))
+            #     val_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
+            #
+            #     train_index = df.index[train_bool].tolist()
+            #     validation_index = df.index[val_bool].tolist()
+            #
+            #     train_id = id_fraud_indenticator[train_bool]
+            #     validation_id = id_fraud_indenticator[val_bool]
+            #
+            #     train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
+            #     validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
+            #
+            #     mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
+            #     validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
+            #
+            #     train_indexs.append(train_index)
+            #     validation_indexs.append(validation_index)
+
+
+
             for test_period in test_periods:
                 if test_period[0] is None:
                     test_bool = pd.Series(np.zeros(df.shape[0], dtype=bool))
@@ -207,6 +280,12 @@ test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
 
+
+# train_period_list = [[[2006, 2008], [2007, 2009]], [[2008, 2010]], [[2009, 2011]], [[2010, 2012]], [[2011, 2013]],
+#                                      [[2012, 2014]], [[2013, 2015]]]
+# test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+#                                     [[2015, 2015]], [[2016, 2016]]]
+# validation_list = [True, False, False, False, False, False, False]
 
 feature_importance = False
 stakeholder = 'Regulator_5'
