@@ -324,3 +324,11 @@ class PerformanceMetrics:
             value = roc_auc_calculator(np.array(true_values_max))
 
         return value
+
+
+    @staticmethod
+    def qloss(y_pred, y_true):
+
+        value = -np.sum((y_pred - y_true)**2)
+
+        return value

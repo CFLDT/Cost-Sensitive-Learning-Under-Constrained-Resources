@@ -43,7 +43,7 @@ def setting_creater(df, feature_names, train_period_list,
     """
 
     df = df[['Res_per', 'CIK', 'Year', 'Restatement Key',
-             'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016', 'F_score',
+             'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016', 'Market_cap_15_per_loss_2016', 'F_score',
              'M_score'] + feature_names]
 
     # replace infs with nan
@@ -73,10 +73,10 @@ def setting_creater(df, feature_names, train_period_list,
         df_y_c['Res_per'] = y_c_copy_cost
 
     if stakeholder == 'Regulator_15':
-        y_c_copy_cost = df_y_c['AAER'].copy()
+        y_c_copy_cost = df_y_c['Res_per'].copy()
         y_c_copy_cost = np.multiply(df_y_c['Market_cap_all_loss_2016'], y_c_copy_cost) + \
                         np.multiply(- df_y_c['Market_cap_15_per_loss_2016'], 1 - y_c_copy_cost)
-        df_y_c['AAER'] = y_c_copy_cost
+        df_y_c['Res_per'] = y_c_copy_cost
 
     y = df_y['Res_per']
     y_c = df_y_c['Res_per']
@@ -193,7 +193,7 @@ def get_par_dict(optimisation_metric):
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
                            "learning_rate": [0.1, 0.01],
-                           "undersample": [0.5, 1],
+                           "undersample": [1],
                            "method": ['RUSBoost']}}
 
     return par_dict
@@ -210,15 +210,15 @@ test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
 
-# train_period_list = [[[2006, 2008], [2007, 2009]], [[2008, 2010]], [[2009, 2011]], [[2010, 2012]], [[2011, 2013]],
-#                                      [[2012, 2014]], [[2013, 2015]]]
-# test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
-#                                     [[2015, 2015]], [[2016, 2016]]]
-# validation_list = [True, False, False, False, False, False, False]
+train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
+                                     [[2010, 2014]], [[2011, 2015]]]
+test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+                                    [[2015, 2015]], [[2016, 2016]]]
+validation_list = [True, False, False, False, False, False]
 
 
 feature_importance = False
-stakeholder = 'Regulator_5'
+stakeholder = 'Regulator_15'
 
 if 'experiment_1' in experiments:
 
@@ -236,7 +236,7 @@ if 'experiment_1' in experiments:
 
     methods = ['Lgbm']
 
-    cross_val_perf_ind = 'precision'
+    cross_val_perf_ind = 'uplift'
     optimisation_metric = 'ep'
 
     for i_1 in range(len(name_list)):
@@ -246,7 +246,7 @@ if 'experiment_1' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
+    par_dict["Lgbm"]["p_ep"] = [0.5]
 
     name = 'Restatement_experiment_1_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -276,8 +276,8 @@ if 'experiment_2' in experiments:
 
     methods = ['Lgbm']
 
-    cross_val_perf_ind = 'uplift'
-    optimisation_metric = 'ep'
+    cross_val_perf_ind = 'arp'
+    optimisation_metric = 'arp'
 
     for i_1 in range(len(name_list)):
         for i_2 in range(len(name_list[i_1])):
@@ -286,7 +286,7 @@ if 'experiment_2' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
+    #par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
 
     name = 'Restatement_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -355,7 +355,7 @@ if 'experiment_4' in experiments:
 
     methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
 
-    cross_val_perf_ind = 'arp'
+    cross_val_perf_ind = 'ql'
     optimisation_metric = 'basic'
 
     for i_1 in range(len(name_list)):
