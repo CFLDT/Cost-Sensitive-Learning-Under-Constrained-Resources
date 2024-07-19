@@ -65,7 +65,6 @@ df['Res_per'] = np.where(
     ,
     1, 0)
 
-df['Restatement Key'] = np.where(df['Res_per'] == 0, np.nan, df["Restatement Key"])
 
 df['Res_m_per'] = np.where(
     ((pd.to_datetime(df["Begin_date"], infer_datetime_format=True) <= pd.to_datetime(df["datadate"],
@@ -75,9 +74,8 @@ df['Res_m_per'] = np.where(
       & (df['Year_8K_402'].notnull() == True))
     , 1, 0)
 
-df['Restatement Key'] = np.where(df['Res_m_per'] == 0, np.nan, df["Restatement Key"])
-df['Year_8K_402'] = np.where(df['Res_per'] == 0, np.nan, df["Year_8K_402"])
-
+df['Restatement Key'] = np.where(((df['Res_per'] == 0)&(df['Res_m_per'] == 0)), np.nan, df["Restatement Key"])
+df['Year_8K_402'] = np.where(df['Res_m_per'] == 0, np.nan, df["Year_8K_402"])
 
 df = df[['Year', 'CIK', 'Res_per', 'Res_m_per', 'Restatement Key', 'Year_8K_402']]
 
