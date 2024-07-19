@@ -201,20 +201,19 @@ def get_par_dict(optimisation_metric):
 
 feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
                  'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
-                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
-
+                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep', 'Log_market_cap_2016']
 
 train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
                                      [[2010, 2014]], [[2011, 2015]]]
 test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
-
-train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
-                                     [[2010, 2014]], [[2011, 2015]]]
-test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
-                                    [[2015, 2015]], [[2016, 2016]]]
-validation_list = [True, False, False, False, False, False]
+#
+# train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
+#                                      [[2010, 2014]], [[2011, 2015]]]
+# test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+#                                     [[2015, 2015]], [[2016, 2016]]]
+# validation_list = [True, False, False, False, False, False]
 
 
 feature_importance = False
@@ -367,6 +366,48 @@ if 'experiment_4' in experiments:
     par_dict["Lgbm"]["n_ratio"] = [1]
 
     name = 'Restatement_experiment_4_info' + '.csv'
+    df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
+
+    performance_check(methods=methods,
+                      par_dict_init=par_dict,
+                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      name_list=name_list, train_list=train_index_list,
+                      validate_list=validation_index_list, test_list=test_index_list,
+                      feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
+                      cost_train=cost_train,
+                      cost_validate=cost_validate)
+
+
+
+if 'experiment_5' in experiments:
+
+    cost_train = True
+    cost_validate = True
+    data_majority_undersample_train = None
+
+    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    name_list, df_experiment_info = \
+        setting_creater(df_restatement,
+                        feature_names=feature_names,
+                        train_period_list=train_period_list,
+                        test_period_list=test_period_list,
+                        stakeholder=stakeholder, validation_list=validation_list)
+
+    methods = ['Lgbm']
+
+    cross_val_perf_ind = 'ep'
+    optimisation_metric = 'ep'
+
+    for i_1 in range(len(name_list)):
+        for i_2 in range(len(name_list[i_1])):
+            name_list[i_1][i_2] = 'Restatement_experiment_5_' + name_list[i_1][i_2]
+
+    par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
+
+    par_dict["Lgbm"]["n_ratio"] = [1]
+    par_dict["Lgbm"]["p_ep"] = [1/3]
+
+    name = 'Restatement_experiment_5_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
 
     performance_check(methods=methods,

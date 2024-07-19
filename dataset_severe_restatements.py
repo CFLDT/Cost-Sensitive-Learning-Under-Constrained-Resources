@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_4'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_severe_restatement_1 = pd.read_csv(path, index_col=0)
@@ -201,7 +201,7 @@ def get_par_dict(optimisation_metric):
 
 feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
                  'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
-                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
+                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep', 'Log_market_cap_2016']
 
 
 train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
@@ -210,11 +210,11 @@ test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
 
-train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
-                                     [[2010, 2014]], [[2011, 2015]]]
-test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
-                                    [[2015, 2015]], [[2016, 2016]]]
-validation_list = [True, False, False, False, False, False]
+# train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
+#                                      [[2010, 2014]], [[2011, 2015]]]
+# test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
+#                                     [[2015, 2015]], [[2016, 2016]]]
+# validation_list = [True, False, False, False, False, False]
 
 
 feature_importance = False
