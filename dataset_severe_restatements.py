@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_3'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_severe_restatement_1 = pd.read_csv(path, index_col=0)
@@ -142,6 +142,10 @@ def setting_creater(df, feature_names, train_period_list,
                 val_ones = np.count_nonzero(val_set)
                 test_ones = np.count_nonzero(test_set)
 
+                # train_set_y_c = y_c[train_index]
+                # a = np.average(np.multiply(train_set_y_c, train_set))
+                # b = np.average(np.multiply(train_set_y_c, 1-train_set))
+
                 name = str(train_period[0]) + '_' + str(train_period[1]) + '_' + str(test_period[0]) + '_' + str(
                     test_period[1])
 
@@ -201,7 +205,7 @@ def get_par_dict(optimisation_metric):
 
 feature_names = ['Wc_acc', 'Rsst_acc', 'Ch_rec', 'Ch_inv', 'Soft_assets', 'Ch_cs', 'Ch_cm', 'Ch_roa',
                  'Ch_fcf', 'Tax', 'Ch_emp', 'Ch_backlog', 'Leasedum', 'Oplease', 'Pension', 'Ch_pension',
-                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep', 'Log_market_cap_2016']
+                 'Exfin', 'Issue', 'Cff', 'Leverage', 'Bm', 'Ep']
 
 
 train_period_list = [[[2004, 2008], [2005, 2009]], [[2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],

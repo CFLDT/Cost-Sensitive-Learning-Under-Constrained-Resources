@@ -50,14 +50,13 @@ df_restatements = df_restatements[['Year', 'CIK', 'Year_8K_402', 'Restatement Ke
 df_restatements = df_restatements.dropna(subset=['Restatement Key', 'Year', 'CIK'])
 
 
-# keep the duplicate row with fewest nan values
-df_restatements = df_restatements.assign(counts=df_restatements.count(axis=1)).sort_values(['counts']). \
-    drop_duplicates(['Year', 'CIK'], keep='last').drop('counts', axis=1)
-df_restatements = df_restatements.sort_values(by=['CIK', 'Year']).reset_index(drop=True)
-
 # Merge with compustat data & ensure that the information already affects the year of interest
 df = company_codes_merger_cik_2(df_restatements)
 
+# The restatement of an annual report can reflect the severity of a restatement because annual reports must be audited by
+# an independent accounting firm.
+# An error or misstatement in an annual report is not only missed by management but also by the firm conducting the audit.
+# Hence, we only use restatements that at least end during the date of the annual close of fiscal period.
 df['Res_per'] = np.where(
     ((pd.to_datetime(df["Begin_date"], infer_datetime_format=True) <= pd.to_datetime(df["datadate"],
                                                                                       infer_datetime_format=True))
@@ -65,6 +64,8 @@ df['Res_per'] = np.where(
                                                                                       infer_datetime_format=True)))
     ,
     1, 0)
+
+df['Restatement Key'] = np.where(df['Res_per'] == 0, np.nan, df["Restatement Key"])
 
 df['Res_m_per'] = np.where(
     ((pd.to_datetime(df["Begin_date"], infer_datetime_format=True) <= pd.to_datetime(df["datadate"],
@@ -74,7 +75,19 @@ df['Res_m_per'] = np.where(
       & (df['Year_8K_402'].notnull() == True))
     , 1, 0)
 
+df['Restatement Key'] = np.where(df['Res_m_per'] == 0, np.nan, df["Restatement Key"])
+df['Year_8K_402'] = np.where(df['Res_per'] == 0, np.nan, df["Year_8K_402"])
+
+
+df = df[['Year', 'CIK', 'Res_per', 'Res_m_per', 'Restatement Key', 'Year_8K_402']]
+
+# keep the duplicate row with fewest nan values ('will focus on nan Year_8K_402 observations with key)
+df = df.assign(counts=df.count(axis=1)).sort_values(['counts']). \
+    drop_duplicates(['Year', 'CIK'], keep='last').drop('counts', axis=1)
+df = df.sort_values(by=['CIK', 'Year']).reset_index(drop=True)
+
 df = df[['Year', 'CIK', 'Res_per', 'Res_m_per', 'Restatement Key']]
+
 df = company_codes_merger_cik(df)
 
 print('The number of Restatements merged using CIK: ' + str(df[df['Res_per'] == 1].shape[0]))

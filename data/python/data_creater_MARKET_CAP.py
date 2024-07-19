@@ -30,7 +30,7 @@ df_mark_cap = df_mark_cap.sort_values(by=['CIK', 'Year']).reset_index(drop=True)
 
 df_mark_cap = company_codes_merger_cik(df_mark_cap)
 
-df_mark_cap['Market_cap'] = df_mark_cap['CSHO'] * df_mark_cap['PRCC_C']
+df_mark_cap['Market_cap'] = df_mark_cap['CSHO'] * df_mark_cap['PRCC_C']    #csho is in  millions
 
 
 def inflates(row):
