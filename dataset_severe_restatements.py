@@ -42,8 +42,9 @@ def setting_creater(df, feature_names, train_period_list,
     features and nans
     """
 
-    df = df[['Res_m_per', 'CIK', 'Year', 'Restatement Key',
-             'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016', 'Market_cap_15_per_loss_2016', 'F_score',
+    df = df[['Res_m_per', 'CIK', 'Year', 'Restatement Key','Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016',
+             'Market_cap_15_per_loss_2016', 'Market_cap_all_loss_2016_scaled', 'Market_cap_5_per_loss_2016_scaled',
+             'Market_cap_15_per_loss_2016_scaled',  'F_score',
              'M_score'] + feature_names]
 
     # replace infs with nan
@@ -59,6 +60,7 @@ def setting_creater(df, feature_names, train_period_list,
 
     df_y = df.copy()
     df_y_c = df.copy()
+    df_y_c_sc = df.copy()
     df_m_score = df.copy()
     df_f_score = df.copy()
 
@@ -71,15 +73,26 @@ def setting_creater(df, feature_names, train_period_list,
                         np.multiply(- df_y_c['Market_cap_5_per_loss_2016'], 1 - y_c_copy_cost)
         df_y_c['Res_m_per'] = y_c_copy_cost
 
+        y_c_sc_copy_cost = df_y_c_sc['Res_m_per'].copy()
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_all_loss_2016_scaled'], y_c_sc_copy_cost) + \
+                        np.multiply(- df_y_c_sc['Market_cap_5_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
+        df_y_c_sc['Res_m_per'] = y_c_sc_copy_cost
+
     if stakeholder == 'Regulator_15':
         y_c_copy_cost = df_y_c['Res_m_per'].copy()
         y_c_copy_cost = np.multiply(df_y_c['Market_cap_all_loss_2016'], y_c_copy_cost) + \
                         np.multiply(- df_y_c['Market_cap_15_per_loss_2016'], 1 - y_c_copy_cost)
         df_y_c['Res_m_per'] = y_c_copy_cost
 
+        y_c_sc_copy_cost = df_y_c_sc['Res_m_per'].copy()
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_all_loss_2016_scaled'], y_c_sc_copy_cost) + \
+                        np.multiply(- df_y_c_sc['Market_cap_5_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
+        df_y_c_sc['Res_m_per'] = y_c_sc_copy_cost
+
 
     y = df_y['Res_m_per']
     y_c = df_y_c['Res_m_per']
+    y_c_sc = df_y_c_sc['Res_m_per']
     m_score = df_m_score['M_score']
     f_score = df_f_score['F_score']
 
@@ -164,7 +177,7 @@ def setting_creater(df, feature_names, train_period_list,
         test_index_list.append(test_indexs)
         name_list.append(names)
 
-    return X, y, y_c, m_score, f_score, train_index_list, validation_index_list, \
+    return X, y, y_c, y_c_sc, m_score, f_score, train_index_list, validation_index_list, \
            test_index_list, name_list, df_experiment_info
 
 def get_par_dict(optimisation_metric):
@@ -230,7 +243,7 @@ if 'experiment_1' in experiments:
     cost_validate = True
     data_majority_undersample_train = None
 
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    X, y, y_c, y_c_sc, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_severe_restatement,
                         feature_names=feature_names,
@@ -257,7 +270,7 @@ if 'experiment_1' in experiments:
 
     performance_check(methods=methods,
                       par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      X=X, y=y, y_c=y_c,y_c_sc=y_c_sc, m_score=m_score, f_score=f_score,
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
@@ -270,7 +283,7 @@ if 'experiment_2' in experiments:
     cost_validate = True
     data_majority_undersample_train = None
 
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    X, y, y_c,y_c_sc, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_severe_restatement,
                         feature_names=feature_names,
@@ -297,7 +310,7 @@ if 'experiment_2' in experiments:
 
     performance_check(methods=methods,
                       par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      X=X, y=y, y_c=y_c, y_c_sc=y_c_sc,m_score=m_score, f_score=f_score,
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
@@ -310,7 +323,7 @@ if 'experiment_3' in experiments:
     cost_validate = True
     data_majority_undersample_train = None
 
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    X, y, y_c, y_c_sc,m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_severe_restatement,
                         feature_names=feature_names,
@@ -336,7 +349,7 @@ if 'experiment_3' in experiments:
 
     performance_check(methods=methods,
                       par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      X=X, y=y, y_c=y_c, y_c_sc=y_c_sc,m_score=m_score, f_score=f_score,
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
@@ -349,7 +362,7 @@ if 'experiment_4' in experiments:
     cost_validate = True
     data_majority_undersample_train = None
 
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    X, y, y_c,y_c_sc, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_severe_restatement,
                         feature_names=feature_names,
@@ -375,7 +388,7 @@ if 'experiment_4' in experiments:
 
     performance_check(methods=methods,
                       par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      X=X, y=y, y_c=y_c,y_c_sc=y_c_sc, m_score=m_score, f_score=f_score,
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,
@@ -388,7 +401,7 @@ if 'experiment_5' in experiments:
     cost_validate = True
     data_majority_undersample_train = None
 
-    X, y, y_c, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
+    X, y, y_c,y_c_sc, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
     name_list, df_experiment_info = \
         setting_creater(df_severe_restatement,
                         feature_names=feature_names,
@@ -415,7 +428,7 @@ if 'experiment_5' in experiments:
 
     performance_check(methods=methods,
                       par_dict_init=par_dict,
-                      X=X, y=y, y_c=y_c, m_score=m_score, f_score=f_score,
+                      X=X, y=y, y_c=y_c,y_c_sc=y_c_sc, m_score=m_score, f_score=f_score,
                       name_list=name_list, train_list=train_index_list,
                       validate_list=validation_index_list, test_list=test_index_list,
                       feature_importance=feature_importance, cross_val_perf_ind=cross_val_perf_ind,

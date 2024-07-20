@@ -15,7 +15,7 @@ from pathlib import Path
 base_path = Path(__file__).parent
 
 
-def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_list,
+def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_score, name_list,
                       train_list, validate_list, test_list, feature_importance, cross_val_perf_ind,
                       cost_train, cost_validate):
 
@@ -72,7 +72,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
                 for test_index in test_indexs:
                     X_trains.append(X.iloc[train_index])
                     y_trains.append(np.array(y.iloc[train_index]))
-                    y_cost_trains.append(np.array(y_c.iloc[train_index]))
+                    y_cost_trains.append(np.array(y_c_sc.iloc[train_index]))
 
                     X_tests.append(X.iloc[test_index])
                     y_tests.append(np.array(y.iloc[test_index]))
@@ -103,7 +103,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, m_score, f_score, name_
         if skip_cross_validate == False:
             par_dict, _ = cross_validation_train_val(
                 methods=methods, par_dict_init_cv=par_dict_init_cv, X=X,
-                y=y, y_c=y_c, train_indexs=train_indexs, validation_indexs=validation_indexs, names=names,
+                y=y, y_c=y_c, y_c_sc = y_c_sc, train_indexs=train_indexs, validation_indexs=validation_indexs, names=names,
                 perf_ind=cross_val_perf_ind,
                 n_ratio=n_ratio, n_p_prec=n_p_prec, p_rbp=p_rbp, p_ep_val=p_ep_val, n_n_found=n_n_found,
                 cost_train=cost_train,
@@ -554,7 +554,7 @@ def pipeliner(X, train_index, validation_index, name, par_dict):
     return dict, datapipeline
 
 
-def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_indexs, validation_indexs,
+def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, y_c_sc, train_indexs, validation_indexs,
                                names, perf_ind, n_ratio, n_p_prec, p_rbp, p_ep_val, n_n_found, cost_train,
                                cost_validate, skip_cross_validate):
     par_dict = copy.deepcopy(par_dict_init_cv)
@@ -597,7 +597,7 @@ def cross_validation_train_val(methods, par_dict_init_cv, X, y, y_c, train_index
             y_train = np.array(y.iloc[train_index])
             y_val = np.array(y.iloc[validation_index])
 
-            y_cost_train = np.array(y_c.iloc[train_index])
+            y_cost_train = np.array(y_c_sc.iloc[train_index])
             y_cost_val = np.array(y_c.iloc[validation_index])
 
             X_train_imp, X_val_imp, _ = scaler(

@@ -57,6 +57,13 @@ df_mark_cap['Market_cap_3_per_loss_2016'] = df_mark_cap['Market_cap_2016'] * 0.0
 df_mark_cap['Market_cap_5_per_loss_2016'] = df_mark_cap['Market_cap_2016'] * 0.05
 df_mark_cap['Market_cap_15_per_loss_2016'] = df_mark_cap['Market_cap_2016'] * 0.15
 
+
+df_mark_cap['Market_cap_all_loss_2016_scaled'] = df_mark_cap['Market_cap_all_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+df_mark_cap['Market_cap_1_per_loss_2016_scaled'] = df_mark_cap['Market_cap_1_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+df_mark_cap['Market_cap_3_per_loss_2016_scaled'] = df_mark_cap['Market_cap_3_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+df_mark_cap['Market_cap_5_per_loss_2016_scaled'] = df_mark_cap['Market_cap_5_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+df_mark_cap['Market_cap_15_per_loss_2016_scaled'] = df_mark_cap['Market_cap_15_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+
 df = company_codes_merger_cik(df_mark_cap)
 
 path = (base_path / "../csv/Market_Cap.csv").resolve()
