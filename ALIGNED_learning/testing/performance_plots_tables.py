@@ -375,7 +375,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_scor
 
 
                 roc, ap, precision, dcg, arp, rbp, uplift, ep, \
-                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_test,
+                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_cost_test,
                                                                                       n_ratio=n_ratio,
                                                                                       n_p_prec=n_p_prec,
                                                                                       p_rbp=p_rbp,
@@ -429,7 +429,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_scor
                 n_found_0_5_df.loc[name_test, 'Lgbm'] = n_found_0_5
 
                 roc, ap, precision, dcg, arp, rbp, uplift, ep, \
-                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_test,
+                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_cost_test,
                                                                                       n_ratio=n_ratio,
                                                                                       n_p_prec=n_p_prec,
                                                                                       p_rbp=p_rbp,
@@ -483,7 +483,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_scor
                 n_found_0_5_df.loc[name_test, 'ENSImb'] = n_found_0_5
 
                 roc, ap, precision, dcg, arp, rbp, uplift, ep, \
-                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_test,
+                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_cost_test,
                                                                                       n_ratio=n_ratio,
                                                                                       n_p_prec=n_p_prec,
                                                                                       p_rbp=p_rbp,
@@ -537,7 +537,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_scor
                 n_found_0_5_df.loc[name_test, 'M_score'] = n_found_0_5
 
                 roc, ap, precision, dcg, arp, rbp, uplift, ep, \
-                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_test,
+                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_cost_test,
                                                                                       n_ratio=n_ratio,
                                                                                       n_p_prec=n_p_prec,
                                                                                       p_rbp=p_rbp,
@@ -587,7 +587,7 @@ def performance_check(methods, par_dict_init, X, y, y_c, y_c_sc, m_score, f_scor
                 n_found_0_5_df.loc[name_test, 'F_score'] = n_found_0_5
 
                 roc, ap, precision, dcg, arp, rbp, uplift, ep, \
-                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_test,
+                n_found, _, n_found_0_1,n_found_0_2,n_found_0_3,n_found_0_4,n_found_0_5= performances(predict, y_cost_test,
                                                                                       n_ratio=n_ratio,
                                                                                       n_p_prec=n_p_prec,
                                                                                       p_rbp=p_rbp,
@@ -633,7 +633,6 @@ def performances(y_pred, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_found, co
         rbp = PerformanceMetrics.performance_metrics_rbp(y_pred, y_test, p_rbp, n=n)
         uplift = PerformanceMetrics.performance_metrics_uplift(y_pred, y_test, n=n)
         ep = PerformanceMetrics.performance_metrics_ep(y_pred, y_test, p_ep, n_ep, n=n)
-        qloss = PerformanceMetrics.qloss(y_pred, y_test)
 
         n_found = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, n_n_found, n=n)
         n_found_0_1 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.1*len(y_test), n=n)
@@ -641,6 +640,7 @@ def performances(y_pred, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_found, co
         n_found_0_3 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.3*len(y_test), n=n)
         n_found_0_4 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.4*len(y_test), n=n)
         n_found_0_5 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.5*len(y_test), n=n)
+        qloss = PerformanceMetrics.qloss(y_pred, y_test)
 
 
         if cost == False:
@@ -653,7 +653,6 @@ def performances(y_pred, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_found, co
             rbp = rbp / PerformanceMetrics.performance_metrics_rbp(y_pred, y_test, p_rbp, maximum=True, n=n)
             uplift = uplift / PerformanceMetrics.performance_metrics_uplift(y_pred, y_test, maximum=True, n=n)
             ep = ep / PerformanceMetrics.performance_metrics_ep(y_pred, y_test, p_ep, n_ep, maximum=True, n=n)
-            qloss = PerformanceMetrics.qloss(y_pred, y_test)
 
             n_found = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, n_n_found, n=n)
             n_found_0_1 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.1 * len(y_test), n=n)
@@ -661,6 +660,7 @@ def performances(y_pred, y_test, n_ratio, n_p_prec, p_rbp, n_p_ep, n_n_found, co
             n_found_0_3 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.3 * len(y_test), n=n)
             n_found_0_4 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.4 * len(y_test), n=n)
             n_found_0_5 = PerformanceMetrics.performance_metrics_n_found(y_pred, y_test, 0.5 * len(y_test), n=n)
+            qloss = PerformanceMetrics.qloss(y_pred, y_test)
 
     except:
 
