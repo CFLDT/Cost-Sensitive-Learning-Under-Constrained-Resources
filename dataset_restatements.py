@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_3'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_restatement_1 = pd.read_csv(path, index_col=0)
@@ -65,6 +65,7 @@ def setting_creater(df, feature_names, train_period_list,
     df_m_score = df.copy()
     df_f_score = df.copy()
 
+    cik_identicator = df_y['CIK'].copy()
     id_fraud_indenticator = df_y['Restatement Key'].copy()
     labeled_fraud_indicator = df_y['Res_per'].copy()
 
@@ -114,17 +115,33 @@ def setting_creater(df, feature_names, train_period_list,
 
 
             train_index = df.index[train_bool].tolist()
-
             validation_index = df.index[val_bool].tolist()
 
-            train_id = id_fraud_indenticator[train_bool]
-            validation_id = id_fraud_indenticator[val_bool]
 
-            train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
-            validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
 
-            mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
+            # train_id = id_fraud_indenticator[train_bool]
+            # validation_id = id_fraud_indenticator[val_bool]
+            #
+            # train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
+            # validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
+            #
+            # mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
+            # validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
+
+
+
+
+
+            financial_misconduct_train_bool = ((train_bool) & (df['Res_per'] == 1))
+
+            train_cik_used = cik_identicator[financial_misconduct_train_bool]
+            validation_cik = cik_identicator[val_bool]
+
+            mask = np.array(~validation_cik.isin(train_cik_used))
             validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
+
+
+
 
             train_indexs.append(train_index)
             validation_indexs.append(validation_index)
@@ -139,9 +156,21 @@ def setting_creater(df, feature_names, train_period_list,
                 test_index = df.index[test_bool].tolist()
                 test_id = id_fraud_indenticator[test_bool]
 
-                mask = np.array(
-                    ((~(test_id.isin(train_id_used) | (test_id.isin(validation_id_used)))) | (np.isnan(test_id))))
+
+
+
+                # mask = np.array(
+                #     ((~(test_id.isin(train_id_used))) | (np.isnan(test_id))))
+                # test_index = np.squeeze(np.array(test_index))[mask].tolist()
+
+
+
+                test_cik = cik_identicator[test_bool]
+
+                mask = np.array(~test_cik.isin(train_cik_used))
                 test_index = np.squeeze(np.array(test_index))[mask].tolist()
+
+
 
                 train_set = y[train_index]
                 val_set = y[validation_index]
@@ -154,10 +183,6 @@ def setting_creater(df, feature_names, train_period_list,
                 train_ones = np.count_nonzero(train_set)
                 val_ones = np.count_nonzero(val_set)
                 test_ones = np.count_nonzero(test_set)
-
-                # train_set_y_c = y_c[train_index]
-                # a = np.average(np.multiply(train_set_y_c, train_set))
-                # b = np.average(np.multiply(train_set_y_c, 1-train_set))
 
                 name = str(train_period[0]) + '_' + str(train_period[1]) + '_' + str(test_period[0]) + '_' + str(
                     test_period[1])
@@ -234,7 +259,7 @@ validation_list = [True, False, False, False, False, False, False]
 
 
 feature_importance = False
-stakeholder = 'Regulator_15'
+stakeholder = 'Regulator_5'
 
 if 'experiment_1' in experiments:
 
