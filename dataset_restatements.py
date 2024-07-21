@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_3'
+experiments = 'experiment_1'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_restatement_1 = pd.read_csv(path, index_col=0)
@@ -119,26 +119,34 @@ def setting_creater(df, feature_names, train_period_list,
 
 
 
-            # train_id = id_fraud_indenticator[train_bool]
-            # validation_id = id_fraud_indenticator[val_bool]
+            train_id = id_fraud_indenticator[train_bool]
+            validation_id = id_fraud_indenticator[val_bool]
+
+            train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
+            validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
+
+            mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
+            validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
+
+
+
+
+
+
+            # financial_misconduct_train_bool = ((train_bool) & (df['Res_per'] == 1))
             #
-            # train_id_used = train_id[labeled_fraud_indicator[train_bool] == 1]
-            # validation_id_used = validation_id[labeled_fraud_indicator[val_bool] == 1]
+            # train_cik_used = cik_identicator[financial_misconduct_train_bool]
+            # validation_cik = cik_identicator[val_bool]
             #
-            # mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
+            # train_cik_all = cik_identicator[train_index]
+            # mask = np.array(~((train_cik_all.isin(train_cik_used)) & (df['Res_per'][train_index] == 0)))
+            # train_index = np.squeeze(np.array(train_index))[mask].tolist()
+
+            # mask = np.array(~validation_cik.isin(train_cik_used))
             # validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
 
 
 
-
-
-            financial_misconduct_train_bool = ((train_bool) & (df['Res_per'] == 1))
-
-            train_cik_used = cik_identicator[financial_misconduct_train_bool]
-            validation_cik = cik_identicator[val_bool]
-
-            mask = np.array(~validation_cik.isin(train_cik_used))
-            validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
 
 
 
@@ -159,16 +167,15 @@ def setting_creater(df, feature_names, train_period_list,
 
 
 
-                # mask = np.array(
-                #     ((~(test_id.isin(train_id_used))) | (np.isnan(test_id))))
-                # test_index = np.squeeze(np.array(test_index))[mask].tolist()
-
-
-
-                test_cik = cik_identicator[test_bool]
-
-                mask = np.array(~test_cik.isin(train_cik_used))
+                mask = np.array(
+                    ((~(test_id.isin(train_id_used))) | (np.isnan(test_id))))
                 test_index = np.squeeze(np.array(test_index))[mask].tolist()
+
+
+
+                # test_cik = cik_identicator[test_bool]
+                # mask = np.array(~test_cik.isin(train_cik_used))
+                # test_index = np.squeeze(np.array(test_index))[mask].tolist()
 
 
 
