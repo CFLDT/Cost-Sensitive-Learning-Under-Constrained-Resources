@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_4'
+experiments = 'experiment_1'
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
 df_restatement_1 = pd.read_csv(path, index_col=0)
@@ -44,7 +44,7 @@ def setting_creater(df, feature_names, train_period_list,
 
     df = df[['Res_per', 'CIK', 'Year', 'Restatement Key','Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016',
              'Market_cap_15_per_loss_2016', 'Market_cap_all_loss_2016_scaled', 'Market_cap_5_per_loss_2016_scaled',
-             'Market_cap_15_per_loss_2016_scaled', 'Market_cap_scaled', 'F_score',
+             'Market_cap_15_per_loss_2016_scaled', 'Market_cap_scaled_2016', 'F_score',
              'M_score'] + feature_names]
 
     # replace infs with nan
@@ -93,12 +93,12 @@ def setting_creater(df, feature_names, train_period_list,
 
     if stakeholder == 'Regulator_15_instance':
         y_c_copy_cost = df_y_c['Res_per'].copy()
-        y_c_copy_cost = np.multiply(df_y_c['Market_cap_scaled'], y_c_copy_cost) + \
+        y_c_copy_cost = np.multiply(df_y_c['Market_cap_2016'], y_c_copy_cost) + \
                         np.multiply(- df_y_c['Market_cap_15_per_loss_2016'], 1 - y_c_copy_cost)
         df_y_c['Res_per'] = y_c_copy_cost
 
         y_c_sc_copy_cost = df_y_c_sc['Res_per'].copy()
-        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled'], y_c_sc_copy_cost) + \
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled_2016'], y_c_sc_copy_cost) + \
                         np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
         df_y_c_sc['Res_per'] = y_c_sc_copy_cost
 
