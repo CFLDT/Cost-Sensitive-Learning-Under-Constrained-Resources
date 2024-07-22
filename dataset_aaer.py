@@ -46,7 +46,7 @@ def setting_creater(df, feature_names, train_period_list,
 
     df = df[['AAER', 'CIK', 'Year', 'AAER_ID', 'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016',
              'Market_cap_15_per_loss_2016', 'Market_cap_all_loss_2016_scaled', 'Market_cap_5_per_loss_2016_scaled',
-             'Market_cap_15_per_loss_2016_scaled', 'F_score', 'M_score'] + feature_names]
+             'Market_cap_15_per_loss_2016_scaled', 'Market_cap_scaled', 'F_score', 'M_score'] + feature_names]
 
     # replace infs with nan
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -88,6 +88,17 @@ def setting_creater(df, feature_names, train_period_list,
 
         y_c_sc_copy_cost = df_y_c_sc['AAER'].copy()
         y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_all_loss_2016_scaled'], y_c_sc_copy_cost) + \
+                        np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
+        df_y_c_sc['AAER'] = y_c_sc_copy_cost
+
+    if stakeholder == 'Regulator_15_instance':
+        y_c_copy_cost = df_y_c['AAER'].copy()
+        y_c_copy_cost = np.multiply(df_y_c['Market_cap_scaled'], y_c_copy_cost) + \
+                        np.multiply(- df_y_c['Market_cap_15_per_loss_2016'], 1 - y_c_copy_cost)
+        df_y_c['AAER'] = y_c_copy_cost
+
+        y_c_sc_copy_cost = df_y_c_sc['AAER'].copy()
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled'], y_c_sc_copy_cost) + \
                         np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
         df_y_c_sc['AAER'] = y_c_sc_copy_cost
 
@@ -234,7 +245,7 @@ def get_par_dict(optimisation_metric):
                 'ENSImb': {"max_depth": [1, 5],
                            "n_estimators": [50, 100],
                            "learning_rate": [0.1, 0.01],
-                           "undersample": [1],
+                           "undersample": [0.5, 1],
                            "method": ['RUSBoost']}}
 
     return par_dict
@@ -260,7 +271,7 @@ validation_list = [True, False, False, False, False, False, False]
 
 
 feature_importance = False
-stakeholder = 'Regulator_5'
+stakeholder = 'Regulator_15_instance'
 
 
 if 'experiment_1' in experiments:
