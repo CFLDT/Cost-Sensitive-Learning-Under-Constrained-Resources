@@ -195,6 +195,7 @@ def target_calculator(y_pred, y_true, y_infer, target_metric, p_inferred, p_ep =
                                      PerformanceMetrics.performance_metrics_arp(y_pred, y_true, maximum=True, n=n)
         inferred_target_metric_value = PerformanceMetrics.performance_metrics_arp(y_pred, p_inferred, maximum=False, n=n) / \
                                        PerformanceMetrics.performance_metrics_arp(y_pred, y_infer, maximum=True, n=n)
+
     if target_metric == 'dcg':
         actual_target_metric_value = PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, maximum=False, n=n) / \
                                      PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, maximum=True, n=n)

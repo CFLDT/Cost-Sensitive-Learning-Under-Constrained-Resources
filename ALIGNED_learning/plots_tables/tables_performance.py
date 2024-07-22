@@ -5,10 +5,12 @@ import pandas as pd
 from pathlib import Path
 
 
-def performance_tables(name, roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precision_df, rbp_df, uplift_df, ep_df,
+def performance_tables(name,  roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precision_df, rbp_df, uplift_df, ep_df,
                        n_found_df, n_found_0_1_df, n_found_0_2_df, n_found_0_3_df, n_found_0_4_df, n_found_0_5_df,
+                       ep_1_3_df, ep_1_2_df, ep_2_3_df,
                        roc_auc_c_df, ap_c_df, disc_cum_gain_c_df, arp_c_df, precision_c_df, rbp_c_df, uplift_c_df,
-                       ep_c_df, n_found_c_df, n_found_0_1_c_df, n_found_0_2_c_df, n_found_0_3_c_df, n_found_0_4_c_df, n_found_0_5_c_df):
+                       ep_c_df, n_found_c_df, n_found_0_1_c_df, n_found_0_2_c_df, n_found_0_3_c_df, n_found_0_4_c_df, n_found_0_5_c_df,
+                       ep_1_3_c_df,ep_1_2_c_df,ep_2_3_c_df):
 
     base_path = Path(__file__).parent
 
@@ -26,7 +28,9 @@ def performance_tables(name, roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precis
     df_means_n_found_0_3 = n_found_0_3_df.mean(axis=0)
     df_means_n_found_0_4 = n_found_0_4_df.mean(axis=0)
     df_means_n_found_0_5 = n_found_0_5_df.mean(axis=0)
-
+    df_means_ep_1_3 = ep_1_3_df.mean(axis=0)
+    df_means_ep_1_2 = ep_1_2_df.mean(axis=0)
+    df_means_ep_2_3 = ep_2_3_df.mean(axis=0)
 
     names = name + '_ROC_AUC_average' + '.csv'
     df_means_auc.to_csv((base_path / "../../tables/tables performance" / names).resolve())
@@ -98,6 +102,21 @@ def performance_tables(name, roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precis
     # names = name + '_N_found_0_5_all' + '.csv'
     # n_found_0_5_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
+    names = name + '_EP_1_3_average' + '.csv'
+    df_means_ep_1_3.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_1_3_all' + '.csv'
+    # ep_1_3_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
+    names = name + '_EP_1_2_average' + '.csv'
+    df_means_ep_1_2.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_1_2_all' + '.csv'
+    # ep_1_2_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
+    names = name + '_EP_2_3_average' + '.csv'
+    df_means_ep_2_3.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_2_3_all' + '.csv'
+    # ep_2_3_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
 
     df_means_auc_c = roc_auc_c_df.mean(axis=0)
     df_means_ap_c = ap_c_df.mean(axis=0)
@@ -113,6 +132,9 @@ def performance_tables(name, roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precis
     df_means_n_found_0_3_c = n_found_0_3_c_df.mean(axis=0)
     df_means_n_found_0_4_c = n_found_0_4_c_df.mean(axis=0)
     df_means_n_found_0_5_c = n_found_0_5_c_df.mean(axis=0)
+    df_means_ep_c_1_3 = ep_1_3_c_df.mean(axis=0)
+    df_means_ep_c_1_2 = ep_1_2_c_df.mean(axis=0)
+    df_means_ep_c_2_3 = ep_2_3_c_df.mean(axis=0)
 
     names = name + '_ROC_AUC_c_average' + '.csv'
     df_means_auc_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
@@ -183,4 +205,19 @@ def performance_tables(name, roc_auc_df, ap_df, disc_cum_gain_df, arp_df, precis
     df_means_n_found_0_5_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
     # names = name + '_N_found_0_5_c_all' + '.csv'
     # n_found_0_5_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
+    names = name + '_EP_1_3_c_average' + '.csv'
+    df_means_ep_c_1_3.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_1_3_c_all' + '.csv'
+    # ep_1_3_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
+    names = name + '_EP_1_2_c_average' + '.csv'
+    df_means_ep_c_1_2.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_1_2_c_all' + '.csv'
+    # ep_1_2_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+
+    names = name + '_EP_2_3_c_average' + '.csv'
+    df_means_ep_c_2_3.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_EP_2_3_c_all' + '.csv'
+    # ep_2_3_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
