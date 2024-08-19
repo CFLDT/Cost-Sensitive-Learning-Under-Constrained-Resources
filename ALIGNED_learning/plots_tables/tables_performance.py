@@ -32,8 +32,8 @@ def performance_tables(name,  roc_auc_df, ap_df, disc_cum_gain_df, arp_df, preci
     df_means_ep_1_2 = ep_1_2_df.mean(axis=0)
     df_means_ep_2_3 = ep_2_3_df.mean(axis=0)
 
-    names = name + '_ROC_AUC_average' + '.csv'
-    df_means_auc.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_ROC_AUC_average' + '.csv'
+    # df_means_auc.to_csv((base_path / "../../tables/tables performance" / names).resolve())
     # names = name + '_ROC_AUC_all' + '.csv'
     # roc_auc_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
@@ -57,8 +57,8 @@ def performance_tables(name,  roc_auc_df, ap_df, disc_cum_gain_df, arp_df, preci
     # names = name + '_Precision_all' + '.csv'
     # precision_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
-    names = name + '_RBP_average' + '.csv'
-    df_means_rbp.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_RBP_average' + '.csv'
+    # df_means_rbp.to_csv((base_path / "../../tables/tables performance" / names).resolve())
     # names = name + '_RBP_all' + '.csv'
     # rbp_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
@@ -136,8 +136,8 @@ def performance_tables(name,  roc_auc_df, ap_df, disc_cum_gain_df, arp_df, preci
     df_means_ep_c_1_2 = ep_1_2_c_df.mean(axis=0)
     df_means_ep_c_2_3 = ep_2_3_c_df.mean(axis=0)
 
-    names = name + '_ROC_AUC_c_average' + '.csv'
-    df_means_auc_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_ROC_AUC_c_average' + '.csv'
+    # df_means_auc_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
     # names = name + '_ROC_AUC_c_all' + '.csv'
     # roc_auc_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
@@ -161,8 +161,8 @@ def performance_tables(name,  roc_auc_df, ap_df, disc_cum_gain_df, arp_df, preci
     # names = name + '_Precision_c_all' + '.csv'
     # precision_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 
-    names = name + '_RBP_c_average' + '.csv'
-    df_means_rbp_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
+    # names = name + '_RBP_c_average' + '.csv'
+    # df_means_rbp_c.to_csv((base_path / "../../tables/tables performance" / names).resolve())
     # names = name + '_RBP_c_all' + '.csv'
     # rbp_c_df.to_csv((base_path / "../../tables/tables performance" / names).resolve())
 

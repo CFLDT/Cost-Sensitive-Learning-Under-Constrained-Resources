@@ -13,7 +13,7 @@ np.random.seed(2290)
 
 base_path = Path(__file__).parent
 
-experiments = 'experiment_1'
+experiments = 'experiment_5'
 
 
 path = (base_path / "data/csv/All_data_1.csv").resolve()
@@ -46,7 +46,8 @@ def setting_creater(df, feature_names, train_period_list,
 
     df = df[['AAER', 'CIK', 'Year', 'AAER_ID', 'Market_cap_all_loss_2016', 'Market_cap_5_per_loss_2016',
              'Market_cap_15_per_loss_2016', 'Market_cap_all_loss_2016_scaled', 'Market_cap_5_per_loss_2016_scaled',
-             'Market_cap_15_per_loss_2016_scaled', 'Market_cap_scaled_2016', 'F_score', 'M_score'] + feature_names]
+             'Market_cap_15_per_loss_2016_scaled', 'Market_cap_2016', 'Market_cap_scaled_2016', 'Market_cap_scaled_average_2016',
+             'Market_cap_5_per_loss_2016_scaled_average', 'Market_cap_15_per_loss_2016_scaled_average', 'F_score', 'M_score'] + feature_names]
 
     # replace infs with nan
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -91,6 +92,17 @@ def setting_creater(df, feature_names, train_period_list,
                         np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
         df_y_c_sc['AAER'] = y_c_sc_copy_cost
 
+    if stakeholder == 'Regulator_5_instance':
+        y_c_copy_cost = df_y_c['AAER'].copy()
+        y_c_copy_cost = np.multiply(df_y_c['Market_cap_2016'], y_c_copy_cost) + \
+                        np.multiply(- df_y_c['Market_cap_5_per_loss_2016'], 1 - y_c_copy_cost)
+        df_y_c['AAER'] = y_c_copy_cost
+
+        y_c_sc_copy_cost = df_y_c_sc['AAER'].copy()
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled_average_2016'], y_c_sc_copy_cost) + \
+                        np.multiply(- df_y_c_sc['Market_cap_5_per_loss_2016_scaled_average'], 1 - y_c_sc_copy_cost)
+        df_y_c_sc['AAER'] = y_c_sc_copy_cost
+
     if stakeholder == 'Regulator_15_instance':
         y_c_copy_cost = df_y_c['AAER'].copy()
         y_c_copy_cost = np.multiply(df_y_c['Market_cap_2016'], y_c_copy_cost) + \
@@ -98,8 +110,8 @@ def setting_creater(df, feature_names, train_period_list,
         df_y_c['AAER'] = y_c_copy_cost
 
         y_c_sc_copy_cost = df_y_c_sc['AAER'].copy()
-        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled_2016'], y_c_sc_copy_cost) + \
-                        np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled'], 1 - y_c_sc_copy_cost)
+        y_c_sc_copy_cost = np.multiply(df_y_c_sc['Market_cap_scaled_average_2016'], y_c_sc_copy_cost) + \
+                        np.multiply(- df_y_c_sc['Market_cap_15_per_loss_2016_scaled_average'], 1 - y_c_sc_copy_cost)
         df_y_c_sc['AAER'] = y_c_sc_copy_cost
 
     y = df_y['AAER']
@@ -139,22 +151,6 @@ def setting_creater(df, feature_names, train_period_list,
             mask = np.array(((~validation_id.isin(train_id_used)) | (np.isnan(validation_id))))
             validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
 
-
-
-            # financial_misconduct_train_bool = ((train_bool) & (df['AAER'] == 1))
-            #
-            # train_cik_used = cik_identicator[financial_misconduct_train_bool]
-            # validation_cik = cik_identicator[val_bool]
-            #
-            # train_cik_all = cik_identicator[train_index]
-            # mask = np.array(~((train_cik_all.isin(train_cik_used)) & (df['AAER'][train_index] == 0)))
-            # train_index = np.squeeze(np.array(train_index))[mask].tolist()
-            #
-            # mask = np.array(~validation_cik.isin(train_cik_used))
-            # validation_index = np.squeeze(np.array(validation_index))[mask].tolist()
-
-
-
             train_indexs.append(train_index)
             validation_indexs.append(validation_index)
 
@@ -171,15 +167,6 @@ def setting_creater(df, feature_names, train_period_list,
                 mask = np.array(
                     ((~(test_id.isin(train_id_used))) | (np.isnan(test_id))))
                 test_index = np.squeeze(np.array(test_index))[mask].tolist()
-
-
-
-                # test_cik = cik_identicator[test_bool]
-                # mask = np.array(~test_cik.isin(train_cik_used))
-                # test_index = np.squeeze(np.array(test_index))[mask].tolist()
-
-
-
 
                 train_set = y[train_index]
                 val_set = y[validation_index]
@@ -229,10 +216,10 @@ def get_par_dict(optimisation_metric):
                           'metric': optimisation_metric  # basic, arp, roc_auc, ap, dcg, ep, rbp, ep, precision
                           },
                 'Lgbm': {"num_leaves": [5],
-                         "n_estimators": [50, 100],  # [50, 100],
-                         "lambd": [0, 10], # [0, 10],
+                         "n_estimators": [100],  # [50, 100],
+                         "lambd": [10], # [0, 10],
                          "alpha": [0],
-                         "learning_rate": [0.1, 0.01],  # [0.1, 0.01],
+                         "learning_rate": [0.1],  # [0.1, 0.01],
                          "colsample_bytree": [0.75],
                          "sample_subsample_undersample": [[0.1, None]],
                          "subsample_freq": [1],
@@ -262,16 +249,13 @@ test_period_list = [[[None, None]], [[2011, 2011]], [[2012, 2012]], [[2013, 2013
                                     [[2015, 2015]], [[2016, 2016]]]
 validation_list = [True, False, False, False, False, False, False]
 
-
-# train_period_list = [[[2005, 2009], [2006, 2010]], [[2007, 2011]], [[2008, 2012]], [[2009, 2013]],
-#                                      [[2010, 2014]], [[2011, 2015]]]
-# test_period_list = [[[None, None]], [[2012, 2012]], [[2013, 2013]], [[2014, 2014]],
-#                                     [[2015, 2015]], [[2016, 2016]]]
-# validation_list = [True, False, False, False, False, False]
+train_period_list = [[[2005, 2009]],  [[2010, 2014]], [[2011, 2015]]]
+test_period_list = [[[None, None]],  [[2015, 2015]], [[2016, 2016]]]
+validation_list = [True, False, False]
 
 
 feature_importance = False
-stakeholder = 'Regulator_5'
+stakeholder = 'Regulator_5_instance'
 
 
 if 'experiment_1' in experiments:
@@ -341,7 +325,6 @@ if 'experiment_2' in experiments:
     par_dict = get_par_dict(optimisation_metric=[optimisation_metric])
 
     par_dict["Lgbm"]["n_ratio"] = [1]
-    #par_dict["Lgbm"]["p_ep"] = [1 / 3, 0.5, 2 / 3]
 
     name = 'AAER_experiment_2_info' + '.csv'
     df_experiment_info.to_csv((base_path / "tables/tables experiment info" / name).resolve())
@@ -360,7 +343,7 @@ if 'experiment_2' in experiments:
 if 'experiment_3' in experiments:
 
     cost_train = False
-    cost_validate = True
+    cost_validate = False
     data_majority_undersample_train = None
 
     X, y, y_c, y_c_sc, m_score, f_score, train_index_list, validation_index_list, test_index_list, \
@@ -412,7 +395,7 @@ if 'experiment_4' in experiments:
                         test_period_list=test_period_list,
                         stakeholder=stakeholder, validation_list=validation_list)
 
-    methods = ['Lgbm', 'ENSImb', 'M_score', 'F_score']
+    methods = ['Lgbm']
 
     cross_val_perf_ind = 'ql'
     optimisation_metric = 'basic'

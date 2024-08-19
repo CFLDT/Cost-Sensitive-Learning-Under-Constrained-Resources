@@ -58,7 +58,7 @@ def inferred_p_calculator(y_pred, y_true, metric, n_relevant_value, p_ep = None,
             gains = true_values
             arp = np.sum(np.multiply(gains, discounter))
 
-            return arp - metric_value
+            return (arp - metric_value)  / max_value
 
     if metric == 'dcg':
         def metric_constraint(true_values):

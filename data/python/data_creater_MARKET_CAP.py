@@ -63,6 +63,19 @@ df_mark_cap['Market_cap_1_per_loss_2016_scaled'] = df_mark_cap['Market_cap_1_per
 df_mark_cap['Market_cap_3_per_loss_2016_scaled'] = df_mark_cap['Market_cap_3_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
 df_mark_cap['Market_cap_5_per_loss_2016_scaled'] = df_mark_cap['Market_cap_5_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
 df_mark_cap['Market_cap_15_per_loss_2016_scaled'] = df_mark_cap['Market_cap_15_per_loss_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+df_mark_cap['Market_cap_scaled_2016'] = df_mark_cap['Market_cap_2016'] / df_mark_cap['Market_cap_all_loss_2016']
+
+
+groupby_obj = df_mark_cap[['Year', 'Market_cap_2016']].groupby(['Year']).mean().reset_index()
+groupby_obj = groupby_obj.rename(columns={"Market_cap_2016": "Market_cap_all_average_2016"})
+
+df_mark_cap = pd.merge(df_mark_cap, groupby_obj, how='left', on=['Year'])
+
+
+df_mark_cap['Market_cap_scaled_average_2016'] = df_mark_cap['Market_cap_2016'] / df_mark_cap['Market_cap_all_average_2016']
+df_mark_cap['Market_cap_5_per_loss_2016_scaled_average'] = df_mark_cap['Market_cap_5_per_loss_2016'] / df_mark_cap['Market_cap_all_average_2016']
+df_mark_cap['Market_cap_15_per_loss_2016_scaled_average'] = df_mark_cap['Market_cap_15_per_loss_2016'] / df_mark_cap['Market_cap_all_average_2016']
+
 
 df = company_codes_merger_cik(df_mark_cap)
 

@@ -26,7 +26,7 @@ minim = minim.rename(columns={"Year": "Begin_year"})
 df_AAER_firm_year = pd.merge(df_AAER_firm_year, minim, how='left', on=['AAER_ID'])
 
 
-#If multiple AAERS affect the same firm in the same year, we keep the one with lowest AAER_ID (the oldest)
+#If same AAER affect the same firm year, we keep one
 df_AAER_firm_year = df_AAER_firm_year.drop_duplicates(subset=['CIK', 'AAER_ID', 'Year'], keep='first')
 
 # Merge with compustat data
