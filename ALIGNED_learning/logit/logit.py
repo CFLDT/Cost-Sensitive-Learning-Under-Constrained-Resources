@@ -153,7 +153,6 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_arp(y_pred, y_true)
 
         # print('Optimisation Objective: ' + str(obj))
 
@@ -211,7 +210,6 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
         if np.all(y_pred == 0):
             obj = obj + 100
 
@@ -272,7 +270,6 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
         if np.all(y_pred == 0):
             obj = obj + 100
 
@@ -318,7 +315,6 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_dcg(y_pred, y_true)
 
         # print('Optimisation Objective: ' + str(obj))
 
@@ -371,9 +367,8 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_ep(y_pred, y_true)
 
-        print('Optimisation Objective: ' + str(obj))
+        # print('Optimisation Objective: ' + str(obj))
 
         return obj, grad
 
@@ -425,7 +420,6 @@ class Lgt:
         # Performance metrics
 
         obj = np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true])) + self.lambd * np.sum(theta ** 2)
-        # obj = -PerformanceMetricsTrain.performance_metrics_precision(y_pred, y_true)
 
         # print('Optimisation Objective: ' + str(obj))
 

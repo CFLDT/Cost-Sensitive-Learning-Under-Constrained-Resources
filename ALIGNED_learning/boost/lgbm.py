@@ -110,12 +110,12 @@ class Lightgbm:
 
     def arp(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -144,29 +144,29 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
 
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_arp(y_pred, y_true, relative=True)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def dcg(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -199,29 +199,29 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
-
         # Performance metrics
 
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
+
         # PerformanceMetrics.performance_metrics_dcg(y_pred, y_true)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def roc_auc(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -271,29 +271,29 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
-
         # Performance metrics
 
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
+
         # PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def ap(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -345,29 +345,29 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
 
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        #print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def ep(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -398,9 +398,6 @@ class Lightgbm:
 
         delta_ij[bool_true] = np.abs(diff_output_1[bool_true] - diff_output_2[bool_true])
 
-        # delta_ij[bool_true] = np.abs(self.discounter[np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)]) -1]
-        #                              - self.discounter[np.abs(ranks_v_stack_trans[(bool_true)] - ranks_v_stack[(bool_true)])])
-
         H_ij[bool_true] = np.multiply(delta_ij[bool_true], G_ij[bool_true])
 
         P_ji, P_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2 = self.lambda_calc(bool_true,
@@ -414,30 +411,30 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
 
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_ep(y_pred, y_true)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        #print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
 
     def precision(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -482,30 +479,30 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
 
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_precision(y_pred, y_true)
-        print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
+        # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
 
     def basic(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
+        #
+        #     y_true = y_true.flat[self.indices_list[self.it_index]]
+        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         scores_1 = -1 / (1 + np.exp(y_pred))
         scores_0 = 1 / (1 + np.exp(-y_pred))
@@ -518,36 +515,20 @@ class Lightgbm:
         hess = np.abs(np.multiply(y_true, sec_der_1)
                       + np.multiply(1-y_true, sec_der_0))
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
-
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     grad_1.flat[self.indices_list[self.it_index]] = grad
+        #     hess_1.flat[self.indices_list[self.it_index]] = hess
+        #
+        #     grad = grad_1
+        #     hess = hess_1
+        #     self.it_index = self.it_index + 1
 
         return grad, hess
 
 
     def reg(self, y_true, y_pred):
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-            hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-
-            y_true = y_true.flat[self.indices_list[self.it_index]]
-            y_pred = y_pred.flat[self.indices_list[self.it_index]]
-
         grad = 2*(y_pred - y_true)
         hess = 2*np.ones(len(y_true))
-
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            grad_1.flat[self.indices_list[self.it_index]] = grad
-            hess_1.flat[self.indices_list[self.it_index]] = hess
-
-            grad = grad_1
-            hess = hess_1
-            self.it_index = self.it_index + 1
 
         return grad, hess

@@ -36,7 +36,6 @@ for i in range(iterations):
 
     y_true = np.random.choice([0, 1], size=(n_t,), p=[1 - prior, prior])
 
-
     y_infer = y_true.copy()
 
     n_relevant_value = np.count_nonzero(y_infer)
@@ -55,13 +54,19 @@ for i in range(iterations):
 
     if cost_sensitive == True:
 
-        costs = np.random.uniform(0, 1, len(y_pred))
         #cost_1
-        y_true = np.where(y_true == 1, np.random.uniform(0, 2), y_true)
-        y_true = np.where(y_true == 0, np.random.uniform(0, 1), y_true)
+        y_true = np.where(y_true == 1, 1, y_true)
+        y_true = np.where(y_true == 0, 0, y_true)
         #cost_2
-        # y_true = np.where(y_true == 1, np.random.uniform(1, 2), y_true)
-        # y_true = np.where(y_true == 0, np.random.uniform(0, 1), y_true)
+        # y_true = np.where(y_true == 1, 1, y_true)
+        # y_true = np.where(y_true == 0, -np.random.uniform(0, 0.05), y_true)
+        #cost_3
+        # y_true = np.where(y_true == 1, np.random.uniform(0, 1), y_true)
+        # y_true = np.where(y_true == 0, np.random.uniform(-0.05, 0), y_true)
+        #cost_4
+        # y_true = np.where(y_true == 1, np.random.uniform(0, 1), y_true)
+        # y_true = np.where(y_true == 0, np.random.uniform(-0.15, 0), y_true)
+
 
 
     outp = y_pred.argsort()[::-1][:n_t]

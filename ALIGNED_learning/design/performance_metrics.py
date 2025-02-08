@@ -47,7 +47,7 @@ class PerformanceMetrics:
             for i in range(len(true_values)):
                 discounter[i] = 1 / (np.log2(i + 2))  # index starts at zero, thus +2
 
-            gains = (2 ** true_values) - 1
+            gains = (2 ** true_values.astype(np.float)) - 1
             dcg = np.sum(np.multiply(gains, discounter))
 
             return dcg
@@ -292,9 +292,6 @@ class PerformanceMetrics:
 
     @staticmethod
     def performance_metrics_roc_auc(y_pred, y_true, maximum=False, n=None):
-
-        # fpr, tpr, threshold = metrics.roc_curve(y, preds)
-        # roc_auc = metrics.auc(fpr, tpr)
 
         def roc_auc_calculator(true_values):
 

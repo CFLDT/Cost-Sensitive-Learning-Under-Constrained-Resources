@@ -4,7 +4,6 @@ from sklearn.preprocessing import MinMaxScaler
 from pathlib import Path
 import random
 from ALIGNED_learning.testing import decision_boundary
-from ALIGNED_learning.design import DivClean
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 from sklearn.preprocessing import StandardScaler
@@ -62,9 +61,6 @@ y = dataset['y']
 train_index = list(np.linspace(0, len(y) - 1, num=len(y), dtype=int))
 test_index = list(np.linspace(0, len(y) - 1, num=len(y), dtype=int))
 
-datapipeline = \
-    DivClean.divide_clean(X, train_index, test_index)
-
 def scaler(X_train_or, X_test_or):
     st_scaler = StandardScaler()
     st_scaler.fit(X_train_or)
@@ -74,8 +70,8 @@ def scaler(X_train_or, X_test_or):
     return X_train, X_test, st_scaler
 
 X_train, X_val, _ = scaler(
-    np.array(datapipeline.pipeline_trans(X)),
-    np.array(datapipeline.pipeline_trans(X)))
+    np.array(X),
+    np.array(X))
 
 
 task_dict = {'name': 'Toy_Data_1'}
@@ -124,8 +120,8 @@ opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0
 opt_par_dict["Lgbm"]["p_ep"] = 2/3
 opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3)) #math.ceil(1 / (0.3 * (1 - 0.3)))
 
-opt_par_dict["Lgbm"]["p_ep"] = 1/3
-opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(1/3), 1/(1 - 1/3))
+# opt_par_dict["Lgbm"]["p_ep"] = 1/3
+# opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(1/3), 1/(1 - 1/3))
 
 
 # TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'

@@ -17,7 +17,7 @@ def decision_boundary(methods, par_dict, X_train, y_train, y_train_clas, task_di
 
         if method == 'Logit':
 
-            model = MethodLearner.logit(par_dict.get('Logit'), X_train, y_train, y_train)
+            model = MethodLearner.logit(par_dict.get('Logit'), X_train, y_train, y_train_clas)
             grid_probs = model.predict_proba(grid)
             name_2 = par_dict.get('Logit').get('metric')
             method_name = method + '_' + name_2
@@ -28,7 +28,6 @@ def decision_boundary(methods, par_dict, X_train, y_train, y_train_clas, task_di
             grid_probs = lgboost.predict_proba(model, grid)
             name_2 = par_dict.get('Lgbm').get('metric')
             method_name = method + '_' + name_2
-            #grid_probs = normalizer(grid_probs)
 
 
         else:

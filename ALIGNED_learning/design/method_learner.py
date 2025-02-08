@@ -69,7 +69,8 @@ class MethodLearner:
                           undersample=undersample, min_child_samples=min_child_samples,
                           min_child_weight=min_child_weight, sigma=sigma, indic_approx=indic_approx)
 
-        lgbst_train, time = lgboost.fitting(X_train, y_train, y_train_clas, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
+        lgbst_train, time = lgboost.fitting(X_train, y_train, y_train_clas, metric=metric, n_ratio= n_ratio, p_prec = p_prec,
+                                            p_rbp = p_rbp, p_ep = p_ep)
 
         return lgboost, lgbst_train
 

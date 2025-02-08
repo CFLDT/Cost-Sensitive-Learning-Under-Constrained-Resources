@@ -6,7 +6,6 @@ from pathlib import Path
 def dec_boundary_plotter(name, method, X, y, xx, yy, grid_probs):
 
 
-
     base_path = Path(__file__).parent
     plot_name_prob = "prob_boundary_" + name + "_" + method + ".png"
     plot_path_prob = (base_path / "../../plots/plots decision boundaries" / plot_name_prob).resolve()
@@ -24,21 +23,9 @@ def dec_boundary_plotter(name, method, X, y, xx, yy, grid_probs):
     ax_c.set_label("Output")
     ax_c.set_ticks(np.linspace(np.min(grid_probs), np.max(grid_probs), 4))
 
-    if name == 'Toy_Data_2':
-
-        ax.scatter(X[:, 0][y==0], X[:, 1][y==0], s=50,
-                   color= '#E26952', vmin=-.2, vmax=1.2)
-
-        ax.scatter(X[:, 0][y!=0], X[:, 1][y!=0], s=50,
-                   color= '#6788EE', vmin=-.2, vmax=1.2) #, edgecolor="white", linewidth=1)
-
-    else:
-
-        ax.scatter(X[:, 0],  X[:, 1], c=y, s=50,
-                   cmap="coolwarm_r", vmin=-.2, vmax=1.2,
-                   edgecolor="white", linewidth=1)
-
-
+    ax.scatter(X[:, 0],  X[:, 1], c=y, s=50,
+               cmap="coolwarm_r", vmin=-.2, vmax=1.2,
+               edgecolor="white", linewidth=1)
 
     ax.set(aspect="equal",
            xlim=(np.min(xx), np.max(xx)), ylim=(np.min(yy), np.max(yy)),

@@ -36,85 +36,71 @@ class Lgbm(Lightgbm):
 
         starttimer = timer()
 
-        indices_0 = np.where(y_clas == 0)[0]
-        indices_1 = np.where(y_clas == 1)[0]
-        all_ind = np.arange(len(y_clas))
+        lengh = len(y_clas)
 
-        if ((self.undersample is not None) or (self.subsample is not None)):
-            self.indices_list = []
-            self.it_index = 0
-            for i in range(self.n_estimators):
-                if ((self.undersample is not None) and (self.subsample is None)):
-                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-                                             replace=False)
-                    ind_tr = list(np.append(indices_1, ind_0))
-                if ((self.undersample is None) and (self.subsample is not None)):
-                    ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
-                    ind_tr = list(ind)
-                if ((self.undersample is not None) and (self.subsample is not None)):
-                    ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-                                             replace=False)
-                    ind_a = list(np.append(indices_1, ind_0))
-                    ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
+        # The code in the comments enables us to use majority undersampling during training on custom (ranking) cost functions.
+        #
+        # ### Steps to Apply:
+        # - Remove the `subsample` keywords in the `LGBMRegressor`.
+        # - Uncomment the corresponding modification in the loss function of interest.
 
-                self.indices_list.append(ind_tr)
-
-        if ((self.undersample is None) and (self.subsample is None)):
-            lengh = len(y_clas)
-        else:
-            lengh = len(ind_tr)
+        # indices_0 = np.where(y_clas == 0)[0]
+        # indices_1 = np.where(y_clas == 1)[0]
+        # all_ind = np.arange(len(y_clas))
+        #
+        # if ((self.undersample is not None) or (self.subsample is not None)):
+        #     self.indices_list = []
+        #     self.it_index = 0
+        #     for i in range(self.n_estimators):
+        #         if ((self.undersample is not None) and (self.subsample is None)):
+        #             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+        #                                      replace=False)
+        #             ind_tr = list(np.append(indices_1, ind_0))
+        #         if ((self.undersample is None) and (self.subsample is not None)):
+        #             ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
+        #             ind_tr = list(ind)
+        #         if ((self.undersample is not None) and (self.subsample is not None)):
+        #             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
+        #                                      replace=False)
+        #             ind_a = list(np.append(indices_1, ind_0))
+        #             ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
+        #
+        #         self.indices_list.append(ind_tr)
+        #
+        # if ((self.undersample is None) and (self.subsample is None)):
+        #     lengh = len(y_clas)
+        # else:
+        #     lengh = len(ind_tr)
 
         if metric == 'basic':
 
-            if self.undersample is None:
-                neg_bagging_fraction = 1
-
-            if self.undersample is not None:
-                n_majority = np.count_nonzero(y) / self.undersample
-                neg_bagging_fraction = n_majority / (len(y) - np.count_nonzero(y))
-                neg_bagging_fraction = min(neg_bagging_fraction, 1)
-
             if np.array_equal(y, y.astype(bool)) == True:
-
-                # model = lgb.LGBMClassifier(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                #                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                #                            reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
-                #                            subsample=self.subsample, subsample_freq=self.subsample_freq,
-                #                            neg_bagging_fraction=neg_bagging_fraction,
-                #                            min_child_samples=self.min_child_samples,
-                #                            min_child_weight=self.min_child_weight,
-                #                            verbose=-1)
 
                 model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                            learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                            reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                           subsample=self.subsample, subsample_freq=self.subsample_freq,
                                            min_child_samples=self.min_child_samples,
                                            min_child_weight=self.min_child_weight,
                                            verbose=-1,objective=self.basic)
 
             else:
 
-                # model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
-                #                           learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
-                #                           reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
-                #                           subsample=self.subsample, subsample_freq=self.subsample_freq,
-                #                           neg_bagging_fraction=neg_bagging_fraction,
-                #                           min_child_samples=self.min_child_samples,
-                #                           min_child_weight=self.min_child_weight,
-                #                           verbose=-1)
-
                 model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                           learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                           reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                          subsample=self.subsample, subsample_freq=self.subsample_freq,
                                           min_child_samples=self.min_child_samples,
                                           min_child_weight=self.min_child_weight,
                                           verbose=-1,objective=self.reg)
-        if metric == 'lambdarank':
-            self.n = int(n_ratio * len(y))
 
+        if metric == 'lambdarank':
+
+            self.n = int(n_ratio * len(y))
             model = lgb.LGBMRanker(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                    learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                    reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                   subsample=self.subsample, subsample_freq=self.subsample_freq,
                                    lambdarank_truncation_level=self.n, lambdarank_norm=False,
                                    min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                    verbose=-1, objective='lambdarank')
@@ -123,6 +109,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.arp)
 
@@ -130,6 +117,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.dcg)
 
@@ -137,6 +125,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.roc_auc)
 
@@ -144,6 +133,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.ap)
 
@@ -174,6 +164,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.ep)
 
@@ -183,6 +174,7 @@ class Lgbm(Lightgbm):
             model = lgb.LGBMRegressor(n_estimators=self.n_estimators, num_leaves=self.num_leaves,
                                       learning_rate=self.learning_rate, reg_lambda=self.reg_lambda,
                                       reg_alpha=self.reg_alpha, colsample_bytree=self.colsample_bytree,
+                                      subsample=self.subsample, subsample_freq=self.subsample_freq,
                                       min_child_samples=self.min_child_samples, min_child_weight=self.min_child_weight,
                                       verbose=-1, objective=self.precision)
 
