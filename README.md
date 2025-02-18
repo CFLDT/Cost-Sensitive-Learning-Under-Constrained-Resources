@@ -1,6 +1,6 @@
 # Cost-Sensitive Learning Under Constrained Resources
 
-This repository contains the code of the paper Cost-Sensitive Learning Under Constrained Resources introducing a cost-sensitive learning framework that integrates observation-specific cost structures into ranking-based machine learning models. By optimizing for cost-sensitive expected precision using LambdaLoss, we demonstrate that machine learning models can be aligned with real-world decision constraints, prioritizing high-impact cases under resource limitations.
+This repository contains the code of the paper "Cost-Sensitive Learning Under Constrained Resources" introducing a cost-sensitive learning framework that integrates observation-specific cost structures into ranking-based machine learning models. By optimizing for cost-sensitive expected precision using LambdaLoss, we demonstrate that machine learning models can be aligned with real-world decision constraints, prioritizing high-impact cases under resource limitations.
 
 To execute the experiments yourself, one can run the [dataset_real.py](dataset_real.py) to test the performance on the data sets. 
 
