@@ -12,8 +12,8 @@ random.seed(2290)
 np.random.seed(2290)
 
 
-iterations = 30
-prior = 0.5
+iterations = 100
+prior = 0.1
 n_t = 100
 
 
@@ -22,8 +22,8 @@ p_ep = 1/2
 n_c_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 p_rbp = 0.9
 
-original_metric = 'ep'
-target_metric = 'ep'
+original_metric = 'roc_auc'
+target_metric = 'roc_auc'
 
 cost_sensitive = True
 
@@ -55,18 +55,24 @@ for i in range(iterations):
     if cost_sensitive == True:
 
         #cost_1
-        y_true = np.where(y_true == 1, 1, y_true)
-        y_true = np.where(y_true == 0, 0, y_true)
+        y_true = y_true
         #cost_2
-        # y_true = np.where(y_true == 1, 1, y_true)
-        # y_true = np.where(y_true == 0, -np.random.uniform(0, 0.05), y_true)
+        # y_true = y_true + (1-y_true)*np.random.uniform(-0.05, 0, len(y_true))
         #cost_3
-        # y_true = np.where(y_true == 1, np.random.uniform(0, 1), y_true)
-        # y_true = np.where(y_true == 0, np.random.uniform(-0.05, 0), y_true)
+        # y_true = y_true*np.random.uniform(0, 1, len(y_true)) + (1-y_true)*np.random.uniform(-0.05, 0, len(y_true))
         #cost_4
-        # y_true = np.where(y_true == 1, np.random.uniform(0, 1), y_true)
-        # y_true = np.where(y_true == 0, np.random.uniform(-0.15, 0), y_true)
-
+        # y_true = y_true*np.random.uniform(0, 1, len(y_true)) + (1-y_true)*np.random.uniform(-0.15, 0, len(y_true))
+        #cost_5
+        # y_true = y_true + (1-y_true)*-np.log(0.05*np.random.exponential(scale = 10, size=len(y_true))+1)
+        #cost_6
+        # y_true = y_true*np.log(np.random.exponential(scale = 10, size=len(y_true))+1) + \
+        #                                 (1-y_true)*-np.log(0.05*np.random.exponential(scale = 10, size=len(y_true))+1)
+        #cost_7
+        # y_true = y_true*np.log(np.random.exponential(scale = 10, size=len(y_true))+1) + \
+        #                                 (1-y_true)*-np.log(0.15*np.random.exponential(scale = 10, size=len(y_true))+1)
+        #cost_8
+        # y_true =  y_true*np.log(np.random.exponential(scale = 10, size=len(y_true))+1) +\
+        #           (1-y_true)*-0.05*np.log(np.random.exponential(scale = 10, size=len(y_true))+1)
 
 
     outp = y_pred.argsort()[::-1][:n_t]
@@ -77,9 +83,11 @@ for i in range(iterations):
 
     if cost_sensitive == False:
 
+        # Aslam method
+        # inferred_p = inferred_p_calculator(y_pred, y_infer, metric=original_metric, n_relevant_value = n_relevant_value,
+        #                                    p_ep=p_ep, n_c_ep=n_c_ep, p_rbp=p_rbp, n_prec = int(p_prec*len(y_true)), n=None)
 
-        inferred_p = inferred_p_calculator(y_pred, y_infer, metric=original_metric, n_relevant_value = n_relevant_value,
-                                           p_ep=p_ep, n_c_ep=n_c_ep, p_rbp=p_rbp, n_prec = int(p_prec*len(y_true)), n=None)
+        inferred_p = y_infer.copy()
 
         actual_target_metric_value,inferred_target_metric_value = target_calculator(y_pred, y_true, y_infer, target_metric=target_metric,
                                                                                     p_inferred= inferred_p,
@@ -89,9 +97,11 @@ for i in range(iterations):
 
     if cost_sensitive == True:
 
+        inferred_p = y_infer.copy()
+
         actual_target_metric_value, inferred_target_metric_value = target_calculator(y_pred, y_true, y_infer,
                                                                                      target_metric=target_metric,
-                                                                                     p_inferred=y_infer,
+                                                                                     p_inferred=inferred_p,
                                                                                      p_ep=p_ep, n_c_ep=n_c_ep,
                                                                                      p_rbp=p_rbp,
                                                                                      n_prec=int(p_prec * len(y_true)),

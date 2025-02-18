@@ -5,7 +5,7 @@ from scipy.stats import binom, beta, betabinom
 class PerformanceMetrics:
 
     @staticmethod
-    def performance_metrics_arp(y_pred, y_true, maximum=False, n=None):
+    def performance_metrics_arp(y_pred, y_true, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -20,7 +20,7 @@ class PerformanceMetrics:
 
             return arp
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -28,16 +28,22 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = arp_calculator(np.array(true_values))
 
-        else:
+        if maximum == True:
 
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = arp_calculator(np.array(true_values_max))
 
+        if minimum == True:
+
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = arp_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_dcg(y_pred, y_true, maximum=False, n=None):
+    def performance_metrics_dcg(y_pred, y_true, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -52,8 +58,7 @@ class PerformanceMetrics:
 
             return dcg
 
-        if maximum == False:
-
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -61,16 +66,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = dcg_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = dcg_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = dcg_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_ap(y_pred, y_true, maximum=False, n=None):
+    def performance_metrics_ap(y_pred, y_true, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -88,7 +97,7 @@ class PerformanceMetrics:
 
             return ap
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -96,16 +105,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = ap_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = ap_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = ap_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_ep(y_pred, y_true, p_ep, n_ep, maximum=False, n=None):
+    def performance_metrics_ep(y_pred, y_true, p_ep, n_ep, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -134,7 +147,7 @@ class PerformanceMetrics:
 
             return ep
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -142,16 +155,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = ep_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = ep_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = ep_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_rbp(y_pred, y_true, p_rbp, maximum=False, n=None):
+    def performance_metrics_rbp(y_pred, y_true, p_rbp, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -168,7 +185,7 @@ class PerformanceMetrics:
 
             return rbp
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -176,16 +193,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = rbp_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = rbp_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = rbp_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_precision(y_pred, y_true, n_prec, maximum=False, n=None):
+    def performance_metrics_precision(y_pred, y_true, n_prec, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -203,7 +224,7 @@ class PerformanceMetrics:
 
             return precision
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -211,16 +232,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = precision_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = precision_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = precision_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_n_found(y_pred, y_true, n_n_found, maximum=False, n=None):
+    def performance_metrics_n_found(y_pred, y_true, n_n_found, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -238,7 +263,7 @@ class PerformanceMetrics:
 
             return n_found
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -246,16 +271,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = n_found_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = n_found_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = n_found_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_uplift(y_pred, y_true, maximum=False, n=None):
+    def performance_metrics_uplift(y_pred, y_true, maximum=False, n=None, minimum = False):
 
         if n == None:
             n = len(y_true)
@@ -274,7 +303,7 @@ class PerformanceMetrics:
 
             return uplift
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -282,16 +311,20 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = uplift_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = uplift_calculator(np.array(true_values_max))
 
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = uplift_calculator(np.array(true_values_min))
+
         return value
 
     @staticmethod
-    def performance_metrics_roc_auc(y_pred, y_true, maximum=False, n=None):
+    def performance_metrics_roc_auc(y_pred, y_true, maximum=False, n=None, minimum = False):
 
         def roc_auc_calculator(true_values):
 
@@ -306,7 +339,7 @@ class PerformanceMetrics:
 
             return roc_auc
 
-        if maximum == False:
+        if ((maximum == False) and (minimum == False)):
             if np.all(y_pred == 0):
                 value = 0
             else:
@@ -314,11 +347,15 @@ class PerformanceMetrics:
                 true_values = y_true[outp]
                 value = roc_auc_calculator(np.array(true_values))
 
-        else:
-
+        if maximum == True:
             outp_max = y_true.argsort()[::-1][:n]
             true_values_max = y_true[outp_max]
             value = roc_auc_calculator(np.array(true_values_max))
+
+        if minimum == True:
+            outp_min = y_true.argsort()[:n]
+            true_values_min = y_true[outp_min]
+            value = roc_auc_calculator(np.array(true_values_min))
 
         return value
 

@@ -191,46 +191,45 @@ def inferred_p_calculator(y_pred, y_true, metric, n_relevant_value, p_ep = None,
 def target_calculator(y_pred, y_true, y_infer, target_metric, p_inferred, p_ep = None, n_c_ep= None, p_rbp = None, n_prec = None, n = None):
 
     if target_metric == 'arp':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_arp(y_pred, y_true, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_arp(y_pred, y_true, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_arp(y_pred, p_inferred, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_arp(y_pred, y_infer, maximum=True, n=n)
-
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_arp(y_pred, y_true,  n=n) - PerformanceMetrics.performance_metrics_arp(y_pred, y_true,  minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_arp(y_pred, y_true,  maximum=True, n=n)  - PerformanceMetrics.performance_metrics_arp(y_pred, y_true, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_arp(y_pred, p_inferred,  n=n) -  PerformanceMetrics.performance_metrics_arp(y_pred, y_infer,  minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_arp(y_pred, y_infer,  maximum=True, n=n) -  PerformanceMetrics.performance_metrics_arp(y_pred, y_infer, minimum=True, n=n))
     if target_metric == 'dcg':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_dcg(y_pred, p_inferred, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_dcg(y_pred, y_infer, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, n=n) - PerformanceMetrics.performance_metrics_dcg(y_pred, y_true,  minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_dcg(y_pred, y_true,  maximum=True, n=n)  - PerformanceMetrics.performance_metrics_dcg(y_pred, y_true, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_dcg(y_pred, p_inferred,   n=n) -  PerformanceMetrics.performance_metrics_dcg(y_pred, y_infer,  minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_dcg(y_pred, y_infer,  maximum=True, n=n) -  PerformanceMetrics.performance_metrics_dcg(y_pred, y_infer,  minimum=True, n=n))
     if target_metric == 'ap':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_ap(y_pred, y_true, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_ap(y_pred, y_true, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_ap(y_pred, p_inferred, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_ap(y_pred, y_infer, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_ap(y_pred, y_true,  n=n) - PerformanceMetrics.performance_metrics_ap(y_pred, y_true, minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_ap(y_pred, y_true,  maximum=True, n=n)  - PerformanceMetrics.performance_metrics_ap(y_pred, y_true, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_ap(y_pred, p_inferred,   n=n) -  PerformanceMetrics.performance_metrics_ap(y_pred, y_infer,  minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_ap(y_pred, y_infer,  maximum=True, n=n) -  PerformanceMetrics.performance_metrics_ap(y_pred, y_infer,  minimum=True, n=n))
     if target_metric == 'ep':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_ep(y_pred, p_inferred, p_ep, n_c_ep, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_ep(y_pred, y_infer, p_ep, n_c_ep, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep,  n=n) - PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, maximum=True, n=n)  - PerformanceMetrics.performance_metrics_ep(y_pred, y_true, p_ep, n_c_ep, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_ep(y_pred, p_inferred, p_ep, n_c_ep,  n=n) -  PerformanceMetrics.performance_metrics_ep(y_pred, y_infer, p_ep, n_c_ep, minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_ep(y_pred, y_infer, p_ep, n_c_ep, maximum=True, n=n) -  PerformanceMetrics.performance_metrics_ep(y_pred, y_infer, p_ep, n_c_ep, minimum=True, n=n))
     if target_metric == 'rbp':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_rbp(y_pred, p_inferred, p_rbp, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_rbp(y_pred, y_infer, p_rbp, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp, n=n) - PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp,minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp, maximum=True, n=n)  - PerformanceMetrics.performance_metrics_rbp(y_pred, y_true, p_rbp, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_rbp(y_pred, p_inferred, p_rbp,  n=n) -  PerformanceMetrics.performance_metrics_rbp(y_pred, y_infer, p_rbp, minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_rbp(y_pred, y_infer, p_rbp, maximum=True, n=n) -  PerformanceMetrics.performance_metrics_rbp(y_pred, y_infer, p_rbp, minimum=True, n=n))
     if target_metric == 'precision':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_precision(y_pred, y_true,n_prec, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_precision(y_pred, y_true,n_prec, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_precision(y_pred, p_inferred,n_prec, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_precision(y_pred, y_infer,n_prec, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_precision(y_pred, y_true, n_prec, n=n) - PerformanceMetrics.performance_metrics_precision(y_pred, y_true,  n_prec, minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_precision(y_pred, y_true,  n_prec, maximum=True, n=n)  - PerformanceMetrics.performance_metrics_precision(y_pred, y_true,  n_prec, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_precision(y_pred, p_inferred,  n_prec, n=n) -  PerformanceMetrics.performance_metrics_precision(y_pred, y_infer,  n_prec, minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_precision(y_pred, y_infer,  n_prec, maximum=True, n=n) -  PerformanceMetrics.performance_metrics_precision(y_pred, y_infer,  n_prec, minimum=True, n=n))
     if target_metric == 'uplift':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_uplift(y_pred, y_true, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_uplift(y_pred, y_true, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_uplift(y_pred, p_inferred, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_uplift(y_pred, y_infer, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_uplift(y_pred, y_true,  n=n) - PerformanceMetrics.performance_metrics_uplift(y_pred, y_true,  minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_uplift(y_pred, y_true,  maximum=True, n=n)  - PerformanceMetrics.performance_metrics_uplift(y_pred, y_true,  minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_uplift(y_pred, p_inferred,   n=n) -  PerformanceMetrics.performance_metrics_uplift(y_pred, y_infer,  minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_uplift(y_pred, y_infer, maximum=True, n=n) -  PerformanceMetrics.performance_metrics_uplift(y_pred, y_infer, minimum=True, n=n))
     if target_metric == 'roc_auc':
-        actual_target_metric_value = PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true, maximum=False, n=n) / \
-                                     PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true, maximum=True, n=n)
-        inferred_target_metric_value = PerformanceMetrics.performance_metrics_roc_auc(y_pred, p_inferred, maximum=False, n=n) / \
-                                       PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_infer, maximum=True, n=n)
+        actual_target_metric_value = (PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true, n=n) - PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true,  minimum=True, n=n)) / \
+                                     (PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true, maximum=True, n=n)  - PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_true, minimum=True, n=n))
+        inferred_target_metric_value = (PerformanceMetrics.performance_metrics_roc_auc(y_pred, p_inferred,  n=n) -  PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_infer, minimum=True, n=n))/ \
+                                       (PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_infer,  maximum=True, n=n) -  PerformanceMetrics.performance_metrics_roc_auc(y_pred, y_infer,  minimum=True, n=n))
 
     return actual_target_metric_value,inferred_target_metric_value
 
