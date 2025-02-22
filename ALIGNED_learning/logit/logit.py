@@ -134,11 +134,12 @@ class Lgt:
         # Base Value
 
         arp_max = PerformanceMetrics.performance_metrics_arp(y_true, y_true, maximum=True)
+        arp_min = PerformanceMetrics.performance_metrics_arp(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = ((y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true])) / (arp_max)
+        G_ij[bool_true] = ((y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true])) / (arp_max-arp_min)
 
         delta_ij[bool_true] = 1
 
@@ -171,11 +172,12 @@ class Lgt:
         # Base Value
 
         roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y_true, y_true, maximum=True)
+        roc_auc_min = PerformanceMetrics.performance_metrics_roc_auc(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (roc_auc_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (roc_auc_max-roc_auc_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -230,11 +232,12 @@ class Lgt:
         # Base Value
 
         ap_max = PerformanceMetrics.performance_metrics_ap(y_true, y_true, maximum=True)
+        ap_min = PerformanceMetrics.performance_metrics_ap(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ap_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ap_max-ap_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -292,11 +295,12 @@ class Lgt:
         # Base Value
 
         ndcg_max = PerformanceMetrics.performance_metrics_dcg(y_true, y_true, maximum=True)
+        ndcg_min = PerformanceMetrics.performance_metrics_dcg(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (2 ** (y_true_v_stack_trans[bool_true]) - 2 ** (y_true_v_stack[bool_true])) / (ndcg_max)
+        G_ij[bool_true] = (2 ** (y_true_v_stack_trans[bool_true]) - 2 ** (y_true_v_stack[bool_true])) / (ndcg_max-ndcg_min)
 
         delta_ij[bool_true] = np.abs((1 / (np.log2(np.abs(ranks_v_stack_trans[((bool_true))] -
                                                           ranks_v_stack[((bool_true))]) + 1))) - \
@@ -335,12 +339,14 @@ class Lgt:
         # Base Value
 
         ep_max = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_ep, maximum=True)
+        ep_min = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_ep, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
 
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ep_max)
+        #G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ep_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ep_max-ep_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -387,12 +393,13 @@ class Lgt:
         # Base Value
 
         precision_max = PerformanceMetrics.performance_metrics_precision(y_true, y_true, self.n_prec, maximum=True)
+        precision_min = PerformanceMetrics.performance_metrics_precision(y_true, y_true, self.n_prec, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
 
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (precision_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (precision_max-precision_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)

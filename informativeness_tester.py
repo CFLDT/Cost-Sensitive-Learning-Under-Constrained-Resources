@@ -3,29 +3,24 @@ from ALIGNED_learning.testing import inferred_p_calculator, target_calculator
 import numpy as np
 from scipy import stats
 import random
-import math
 
-
-#random permutations
 
 random.seed(2290)
 np.random.seed(2290)
 
-
 iterations = 100
 prior = 0.1
 n_t = 100
-
 
 p_prec = 0.5
 p_ep = 1/2
 n_c_ep = max(1 / (p_ep), 1 / (1 - p_ep))
 p_rbp = 0.9
 
-original_metric = 'roc_auc'
-target_metric = 'roc_auc'
+original_metric = 'ep'
+target_metric = 'ep'
 
-cost_sensitive = True
+cost_sensitive = False
 
 actual_target_metric_value_array = np.zeros(iterations)
 inferred_target_metric_value_array = np.zeros(iterations)

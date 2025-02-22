@@ -7,10 +7,7 @@ from scipy.stats import beta
 
 class Logit(Lgt):
 
-    def __init__(self, lambd, sigma, indic_approx, subsample, undersample, theta=None):
-
-        self.subsample = subsample
-        self.undersample = undersample
+    def __init__(self, lambd, sigma, indic_approx, theta=None):
 
         super().__init__(lambd, sigma, indic_approx, theta)
 
@@ -21,30 +18,7 @@ class Logit(Lgt):
 
         starttimer = timer()
 
-        indices_0 = np.where(y_clas == 0)[0]
-        indices_1 = np.where(y_clas == 1)[0]
-        all_ind = np.arange(len(y_clas))
-
-        if ((self.undersample is not None) and (self.subsample is None)):
-            ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-                                     replace=False)
-            ind_tr = list(np.append(indices_1, ind_0))
-            X = X[ind_tr, :]
-            y = y[ind_tr]
-        if ((self.undersample is None) and (self.subsample is not None)):
-            ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
-            ind_tr = list(ind)
-            X = X[ind_tr, :]
-            y = y[ind_tr]
-        if ((self.undersample is not None) and (self.subsample is not None)):
-            ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-                                     replace=False)
-            ind_a = list(np.append(indices_1, ind_0))
-            ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
-            X = X[ind_tr, :]
-            y = y[ind_tr]
-
-        self.n = int(n_ratio * len(y))
+        self.n = int(n_ratio * len(y_clas))
         div = 1 / X.shape[0]
 
         if metric == 'basic':

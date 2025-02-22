@@ -110,13 +110,6 @@ class Lightgbm:
 
     def arp(self, y_true, y_pred):
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
-
         # Variables
 
         diff_ij, G_ij, H_ij, P_ij, P_ji, constant_ij, delta_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2, ranks_v_stack_trans, \
@@ -126,11 +119,12 @@ class Lightgbm:
         # Base Value
 
         arp_max = PerformanceMetrics.performance_metrics_arp(y_true, y_true, maximum=True)
+        arp_min = PerformanceMetrics.performance_metrics_arp(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = ((y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true])) / (arp_max)
+        G_ij[bool_true] = ((y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true])) / (arp_max-arp_min)
 
         delta_ij[bool_true] = 1
 
@@ -144,14 +138,6 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
-
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_arp(y_pred, y_true, relative=True)
@@ -160,13 +146,6 @@ class Lightgbm:
         return grad, hess
 
     def dcg(self, y_true, y_pred):
-
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -177,11 +156,12 @@ class Lightgbm:
         # Base Value
 
         ndcg_max = PerformanceMetrics.performance_metrics_dcg(y_true, y_true, maximum=True)
+        ndcg_min = PerformanceMetrics.performance_metrics_dcg(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (2 ** (y_true_v_stack_trans[bool_true]) - 2 ** (y_true_v_stack[bool_true])) / (ndcg_max)
+        G_ij[bool_true] = (2 ** (y_true_v_stack_trans[bool_true]) - 2 ** (y_true_v_stack[bool_true])) / (ndcg_max-ndcg_min)
 
         delta_ij[bool_true] = np.abs((1 / (np.log2(np.abs(ranks_v_stack_trans[((bool_true))] -
                                                           ranks_v_stack[((bool_true))]) + 1))) - \
@@ -201,27 +181,12 @@ class Lightgbm:
 
         # Performance metrics
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
-
         # PerformanceMetrics.performance_metrics_dcg(y_pred, y_true)
         # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def roc_auc(self, y_true, y_pred):
-
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -232,11 +197,12 @@ class Lightgbm:
         # Base Value
 
         roc_auc_max = PerformanceMetrics.performance_metrics_roc_auc(y_true, y_true, maximum=True)
+        roc_auc_min = PerformanceMetrics.performance_metrics_roc_auc(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (roc_auc_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (roc_auc_max-roc_auc_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -273,27 +239,12 @@ class Lightgbm:
 
         # Performance metrics
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
-
         # PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
         # print('Optimisation Objective: ' + str(np.sum(np.multiply(H_ij[bool_true], P_ji[bool_true]))))
 
         return grad, hess
 
     def ap(self, y_true, y_pred):
-
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -304,12 +255,12 @@ class Lightgbm:
         # Base Value
 
         ap_max = PerformanceMetrics.performance_metrics_ap(y_true, y_true, maximum=True)
+        ap_min = PerformanceMetrics.performance_metrics_ap(y_true, y_true, minimum=True)
 
         # Lambda_ij calculation
 
-
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ap_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ap_max-ap_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -345,14 +296,6 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
-
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_ap(y_pred, y_true)
@@ -361,13 +304,6 @@ class Lightgbm:
         return grad, hess
 
     def ep(self, y_true, y_pred):
-
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
 
         # Variables
 
@@ -378,12 +314,14 @@ class Lightgbm:
         # Base Value
 
         ep_max = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_ep, maximum=True)
+        ep_min = PerformanceMetrics.performance_metrics_ep(y_true, y_true, self.p_ep, self.n_ep, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
 
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ep_max)
+        #G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / ep_max
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (ep_max-ep_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -411,14 +349,6 @@ class Lightgbm:
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
-
         # Performance metrics
 
         # PerformanceMetricsTrain.performance_metrics_ep(y_pred, y_true)
@@ -429,13 +359,6 @@ class Lightgbm:
 
     def precision(self, y_true, y_pred):
 
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #     hess_1 = np.zeros(shape=np.shape(y_true), dtype=np.float32)
-        #
-        #     y_true = y_true.flat[self.indices_list[self.it_index]]
-        #     y_pred = y_pred.flat[self.indices_list[self.it_index]]
-
         # Variables
 
         diff_ij, G_ij, H_ij, P_ij, P_ji, constant_ij, delta_ij, lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2, ranks_v_stack_trans, \
@@ -445,12 +368,13 @@ class Lightgbm:
         # Base Value
 
         precision_max = PerformanceMetrics.performance_metrics_precision(y_true, y_true, self.n_prec, maximum=True)
+        precision_min = PerformanceMetrics.performance_metrics_precision(y_true, y_true, self.n_prec, minimum=True)
 
         # Lambda_ij calculation
 
         diff_ij[bool_true] = y_pred_v_stack_trans[bool_true] - y_pred_v_stack[bool_true]
 
-        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (precision_max)
+        G_ij[bool_true] = (y_true_v_stack_trans[bool_true] - y_true_v_stack[bool_true]) / (precision_max-precision_min)
 
         input_1 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
         input_2 = np.zeros(shape=np.shape(G_ij), dtype=np.int32)
@@ -478,14 +402,6 @@ class Lightgbm:
         # Grad_Hess
 
         grad, hess = self.grad_hess(lamb_ij, lamb_ij_2, lambd_der_ij, lambd_der_ij_2)
-
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     grad_1.flat[self.indices_list[self.it_index]] = grad
-        #     hess_1.flat[self.indices_list[self.it_index]] = hess
-        #
-        #     grad = grad_1
-        #     hess = hess_1
-        #     self.it_index = self.it_index + 1
 
         # Performance metrics
 

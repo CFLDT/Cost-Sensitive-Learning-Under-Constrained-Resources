@@ -1,19 +1,10 @@
 
 from scipy.optimize import fmin_slsqp
-import numpy as np
 from ALIGNED_learning.design import PerformanceMetrics
-from ALIGNED_learning.plots_tables import informativeness_plotter
 import numpy as np
-from scipy.stats import binom, beta, betabinom
-import seaborn as sns
-import matplotlib.pyplot as plt
-from scipy import stats
-import random
+from scipy.stats import beta
 
 def inferred_p_calculator(y_pred, y_true, metric, n_relevant_value, p_ep = None, n_c_ep= None, p_rbp = None, n_prec =None, n = None):
-
-
-    #original
 
     if metric == 'arp':
         max_value = PerformanceMetrics.performance_metrics_arp(y_pred, y_true, maximum=True, n=n)
@@ -121,7 +112,7 @@ def inferred_p_calculator(y_pred, y_true, metric, n_relevant_value, p_ep = None,
                 discounter[i] = p_rbp ** (i)
 
             gains = true_values
-            rbp = np.sum(np.multiply(discounter, gains))  # can do times (1 - p_rbp)  to normalize
+            rbp = np.sum(np.multiply(discounter, gains))
 
             return (rbp - metric_value) / max_value
 

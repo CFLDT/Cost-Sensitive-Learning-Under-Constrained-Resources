@@ -7,8 +7,6 @@ from ALIGNED_learning.testing import decision_boundary
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 from sklearn.preprocessing import StandardScaler
-import math
-
 
 random.seed(2290)
 np.random.seed(2290)
@@ -84,51 +82,29 @@ opt_par_dict = {'General_val_test': {'n_ratio': 1,
                             'n_n_found': 26},
                 'Logit': {'lambd': 0,
                           'sigma': 1,
-                          'subsample_undersample': [None, None],
                           'indic_approx': 'lambdaloss', #'lambdaloss', 'logit'
-                          'metric': 'basic'  # basic, roc_auc, arp, ap, dcg, ep, rbp, ep, precision
+                          'metric': 'basic'
                           },
                 'Lgbm': {"num_leaves": 5,
                          "n_estimators": 100,
                          "lambd": 0,
                          "alpha": 0,
                          "learning_rate": 0.1,
-                         "sample_subsample_undersample": [0.1, None],
+                         "sample_subsample_undersample": [0.5, None],     #undersample not yet implemented
                          "subsample_freq": 1,
                          "min_child_samples": 0,
-                         "min_child_weight": 1e-3 ,   #1e-3 do not change. this causes issues regarding validation 'binary' and 'lambdarank'
-                         "sigma": 1,                   # 1 for validation 'binary' and 'lambdarank'
-                         "indic_approx": 'lambdaloss',   #'lambdaloss', 'logit'   #lambdaloss for validation 'binary' and 'lambdarank'
-                         "metric": 'ep'}}    # basic, lambdarank, arp, roc_auc, ap, dcg, ep, rbp, precision, uplift
-
-opt_par_dict["Logit"]["n_ratio"] = 1
-opt_par_dict["Logit"]["p_prec"] = 0.05
-opt_par_dict["Logit"]["p_rbp"] = 0.8
-opt_par_dict["Logit"]["p_ep"] = 0.5
-opt_par_dict["Logit"]["n_c_ep"] = max(1/(0.5), 1/(1 - 0.5)) #math.ceil(1 / (0.5 * (1 - 0.5)))
-
-opt_par_dict["Logit"]["p_ep"] = 0.1
-opt_par_dict["Logit"]["n_c_ep"] = max(1/(0.1), 1/(1 - 0.1)) #math.ceil(1 / (0.005 * (1 - 0.005)))
-
-opt_par_dict["Lgbm"]["n_ratio"] = 1
-opt_par_dict["Lgbm"]["p_prec"] = 0.1
-opt_par_dict["Lgbm"]["p_rbp"] = 0.8
-opt_par_dict["Lgbm"]["p_ep"] = 0.005
-opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(0.005), 1/(1 - 0.005)) #math.ceil(1 / (0.005 * (1 - 0.005)))
-
+                         "min_child_weight": 1e-3 ,
+                         "sigma": 1,
+                         "indic_approx": 'lambdaloss',  #'lambdaloss', 'logit'
+                         "metric": 'ep'}}
 
 opt_par_dict["Lgbm"]["p_ep"] = 2/3
-opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3)) #math.ceil(1 / (0.3 * (1 - 0.3)))
+opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(2/3), 1/(1 - 2/3))
 
 # opt_par_dict["Lgbm"]["p_ep"] = 1/3
 # opt_par_dict["Lgbm"]["n_c_ep"] = max(1/(1/3), 1/(1 - 1/3))
 
 
-# TO COMPARE GO TO LGBM FILE AND GO TO THE LINE(S) WITH THE WORDS 'COMPARE'
-
-# TEST CORRECTNESS ROC AUC ETC PERFORMANCE MEASURES
-
-#https://lightgbm.readthedocs.io/en/latest/Parameters.html#lambdarank_truncation_level
 dec_bound = True
 if dec_bound:
     decision_boundary(['Lgbm'], opt_par_dict, X_train, y, y, task_dict=task_dict)

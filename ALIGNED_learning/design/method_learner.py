@@ -1,8 +1,6 @@
 import numpy as np
 import ALIGNED_learning.boost as ab
-
 from ..logit import Logit
-from sklearn.linear_model import LogisticRegression
 
 
 class MethodLearner:
@@ -14,25 +12,19 @@ class MethodLearner:
         metric = par_dict_logit.get("metric")
         sigma = par_dict_logit.get("sigma")
         indic_approx = par_dict_logit.get("indic_approx")
-        sample = par_dict_logit.get("subsample_undersample")
-        subsample = sample[0]
-        undersample = sample[1]
 
         n_ratio = par_dict_logit.get("n_ratio")
         p_rbp = par_dict_logit.get("p_rbp")
         p_ep = par_dict_logit.get("p_ep")
-        #n_c_ep = par_dict_logit.get("n_c_ep")
         p_prec = par_dict_logit.get("p_prec")
 
         if metric == 'basic':
             init_theta = np.zeros(np.shape(X_train)[1] + 1)
-            #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1] + 1)
         else:
             init_theta = np.zeros(np.shape(X_train)[1])
-            #init_theta = np.random.uniform(low=-1, high=1, size=np.shape(X_train)[1])
 
 
-        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx, subsample = subsample, undersample=undersample)
+        logist = Logit(lambd=lambd, sigma=sigma, indic_approx=indic_approx)
         logist.fitting(X_train, y_train, y_train_clas, init_theta, metric=metric, n_ratio= n_ratio, p_prec = p_prec, p_rbp = p_rbp, p_ep = p_ep)
 
         return logist
@@ -60,7 +52,6 @@ class MethodLearner:
         n_ratio = par_dict_lgbm.get("n_ratio")
         p_rbp = par_dict_lgbm.get("p_rbp")
         p_ep = par_dict_lgbm.get("p_ep")
-        #n_c_ep = par_dict_lgbm.get("n_c_ep")
         p_prec = par_dict_lgbm.get("p_prec")
 
 
@@ -75,7 +66,7 @@ class MethodLearner:
         return lgboost, lgbst_train
 
     @staticmethod
-    def ensimb(par_dict, X_clas_train, y_train):
+    def ensimb(par_dict, X_train, y_train):
 
         max_depth = par_dict.get("max_depth")
         n_estimators = par_dict.get("n_estimators")
@@ -86,9 +77,9 @@ class MethodLearner:
         if undersample == None:
             undersample = np.sum(y_train) / (np.sum(1 - y_train))
 
-        ensimb = ab.ensimb_sup.ENSMImb(n_estimators=n_estimators, max_depth=max_depth,
+        ensimb = ab.ENSMImb(n_estimators=n_estimators, max_depth=max_depth,
                                        learning_rate=learning_rate, undersample=undersample)
 
-        ensbimb_train, time = ensimb.fitting(X_clas_train, y_train, ensemble_method=ensemble_method)
+        ensbimb_train, time = ensimb.fitting(X_train, y_train, ensemble_method=ensemble_method)
 
         return ensimb, ensbimb_train

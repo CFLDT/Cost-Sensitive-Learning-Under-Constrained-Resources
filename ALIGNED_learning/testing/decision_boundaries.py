@@ -2,7 +2,6 @@ import numpy as np
 
 from ..plots_tables import dec_boundary_plotter
 from ..design import MethodLearner
-from ALIGNED_learning.design import PerformanceMetrics
 
 def decision_boundary(methods, par_dict, X_train, y_train, y_train_clas, task_dict):
 
@@ -33,33 +32,5 @@ def decision_boundary(methods, par_dict, X_train, y_train, y_train_clas, task_di
         else:
 
             continue
-
-        # n_ratio = par_dict.get('General_val_test').get("n_ratio")
-        # n_p_prec = par_dict.get('General_val_test').get("n_p_prec")
-        # p_rbp = par_dict.get('General_val_test').get("p_rbp")
-        # n_p_ep = par_dict.get('General_val_test').get("n_p_ep")
-        # n_n_found = par_dict.get('General_val_test').get("n_n_found")
-        #
-        # n = n_ratio * len(y_train)
-        # n_prec = n_p_prec
-        # p_ep = n_p_ep / len(y_train)
-        # n_ep = max(1 / (p_ep), 1 / (1 - p_ep))
-        #
-        # if method == 'Logit':
-        #     predict_prob = model.predict_proba(X_train)
-        #
-        # elif method == 'Lgbm':
-        #     predict_prob = lgboost.predict_proba(model, X_train)
-        #
-        # roc = PerformanceMetrics.performance_metrics_roc_auc(predict_prob, y_train, n=n)
-        # ap = PerformanceMetrics.performance_metrics_ap(predict_prob, y_train, n=n)
-        # precision = PerformanceMetrics.performance_metrics_precision(predict_prob, y_train, n_prec, n=n)
-        # dcg = PerformanceMetrics.performance_metrics_dcg(predict_prob, y_train, n=n)
-        # arp = PerformanceMetrics.performance_metrics_arp(predict_prob, y_train, n=n)
-        # rbp = PerformanceMetrics.performance_metrics_rbp(predict_prob, y_train, p_rbp, n=n)
-        # uplift = PerformanceMetrics.performance_metrics_uplift(predict_prob, y_train, n=n)
-        # ep = PerformanceMetrics.performance_metrics_ep(predict_prob, y_train, p_ep, n_ep, n=n)
-        # n_found = PerformanceMetrics.performance_metrics_n_found(predict_prob, y_train, n_n_found, n=n)
-
 
         dec_boundary_plotter(name, method_name, X_train,  y_train, xx, yy, grid_probs)

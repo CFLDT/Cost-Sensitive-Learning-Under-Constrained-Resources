@@ -38,40 +38,6 @@ class Lgbm(Lightgbm):
 
         lengh = len(y_clas)
 
-        # The code in the comments enables us to use majority undersampling during training on custom (ranking) cost functions.
-        #
-        # ### Steps to Apply:
-        # - Remove the `subsample` keywords in the `LGBMRegressor`.
-        # - Uncomment the corresponding modification in the loss function of interest.
-
-        # indices_0 = np.where(y_clas == 0)[0]
-        # indices_1 = np.where(y_clas == 1)[0]
-        # all_ind = np.arange(len(y_clas))
-        #
-        # if ((self.undersample is not None) or (self.subsample is not None)):
-        #     self.indices_list = []
-        #     self.it_index = 0
-        #     for i in range(self.n_estimators):
-        #         if ((self.undersample is not None) and (self.subsample is None)):
-        #             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-        #                                      replace=False)
-        #             ind_tr = list(np.append(indices_1, ind_0))
-        #         if ((self.undersample is None) and (self.subsample is not None)):
-        #             ind = np.random.choice(all_ind, size=int(np.rint(self.subsample * all_ind.shape[0])), replace=False)
-        #             ind_tr = list(ind)
-        #         if ((self.undersample is not None) and (self.subsample is not None)):
-        #             ind_0 = np.random.choice(indices_0, size=int(np.rint((1 / self.undersample) * indices_1.shape[0])),
-        #                                      replace=False)
-        #             ind_a = list(np.append(indices_1, ind_0))
-        #             ind_tr = np.random.choice(ind_a, size=int(np.rint(self.subsample * len(ind_a))), replace=False)
-        #
-        #         self.indices_list.append(ind_tr)
-        #
-        # if ((self.undersample is None) and (self.subsample is None)):
-        #     lengh = len(y_clas)
-        # else:
-        #     lengh = len(ind_tr)
-
         if metric == 'basic':
 
             if np.array_equal(y, y.astype(bool)) == True:
