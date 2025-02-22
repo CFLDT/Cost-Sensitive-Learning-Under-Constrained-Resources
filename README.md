@@ -6,7 +6,7 @@ To execute the experiments yourself, one can run the [dataset_real.py](dataset_r
 
 ## Data
 
-The data of all benchmark and public imbalanced data sets that are used in the experiments can be found in the [data](data) folder. 
+The data of all data sets that are used in the empirical analyses can be found in the [data](data) folder. 
 
 ## Reference 
 
