@@ -14,7 +14,7 @@ If you re-use this work, please cite:
 
 ```
 @article{,
-  title={Cost-Sensitive Learning Under Constrained Resources},
+  title={Cost-Sensitive Learning Under Constrained Resources for Maximizing Economic Impact},
   author={Van der Schraelen, Lennert and Stouthuysen, Kristof and Broucke, Seppe Vanden and Verdonck, Tim},
   journal={ },
   year={ },
