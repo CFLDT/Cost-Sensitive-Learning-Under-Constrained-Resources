@@ -75,7 +75,8 @@ class WoeEncoder:
         woe_mapping[str(X.name)] = dict(zip(temp_woe['Category'], temp_woe['WOE']))
 
         try:
-            self.woe_df = self.woe_df.append(temp_woe, ignore_index=True)
+            #self.woe_df = self.woe_df.append(temp_woe, ignore_index=True)
+            self.woe_df = pd.concat([self.woe_df, temp_woe], ignore_index=True)
             self.woe_bins.update(woe_mapping)
         except:
             self.woe_df = temp_woe
